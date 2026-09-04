@@ -1,21 +1,3 @@
-# ============================================================
-# Athletica — Product AI Assistant backend (Python + Gemini, LIBRE)
-# ============================================================
-# Gumagamit ito ng Google Gemini API sa halip na Claude — may
-# libreng tier ito (1,500 requests/araw), walang credit card.
-#
-# I-drop mo ito sa "backend" folder ng repo mo (kasama o kapalit
-# ng Node files). Kailangan mo lang:
-#
-#   pip install flask flask-cors google-genai
-#
-# Tapos i-set ang env var bago patakbuhin:
-#   GEMINI_API_KEY=xxxxx python product-chat-server.py
-#
-# Kunin ang libreng API key sa: https://aistudio.google.com/apikey
-# (mag-sign in gamit ang Google account, i-tap "Create API key" —
-# walang credit card na hinihingi.)
-# ============================================================
 
 import os
 from flask import Flask, request, jsonify
@@ -24,12 +6,10 @@ from google import genai
 from google.genai import types
 
 app = Flask(__name__)
-CORS(app)  # sa production, i-restrict mo ito sa domain ng site mo lang
+CORS(app)
 
 client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
-# Gemini 3.5 Flash-Lite — pinakamataas na free-tier quota sa mga
-# available na Gemini model ngayon (mas mataas kaysa gemini-3.6-flash).
 MODEL = "gemini-3.5-flash-lite"
 
 
@@ -43,19 +23,12 @@ def product_chat():
     if not product or not message:
         return jsonify({"error": "Missing product or message."}), 400
 
-    # ------------------------------------------------------------
-    # IMPORTANT (security note): dito sa example na ito, galing sa
-    # client ang product info (name/price/description/sizes/stock).
-    # Kung may sarili kang product database sa server, mas mabuti
-    # kunin mo ULIT ang tunay na product doon gamit ang product.id
-    # sa halip na basta paniwalaan ang presyo/detalye na pinadala
-    # ng browser — para hindi ito ma-manipulate ng user.
-    # ------------------------------------------------------------
+
 
     sizes = product.get("sizes") if isinstance(product.get("sizes"), list) else []
 
     system_prompt = "\n".join([
-        "Ikaw ay ang \"Athletica Assistant\" — isang shopping assistant na",
+        "Ikaw ay ang \"CVSPEE Assistant\" — isang shopping assistant na",
         "nasa loob ng product chat window ng ISANG produkto lamang.",
         "",
         "MAHIGPIT NA PATAKARAN: Tumutugon ka LAMANG tungkol sa produktong",
@@ -96,7 +69,7 @@ def product_chat():
         )
         tools = [types.Tool(function_declarations=[select_size_fn])]
 
-    # Ihanda ang message history papunta sa Gemini.
+    
     contents = []
     for m in history:
         role = m.get("role")
@@ -136,7 +109,7 @@ def product_chat():
                 selected_size = (fc.args or {}).get("size")
 
     if not reply.strip():
-        reply = f"Naitala ko na ang size {selected_size}." if selected_size else "Paumanhin, maaari mo bang ulitin ang tanong?"
+        reply = f"The button has been released. {selected_size}." if selected_size else "Paumanhin, maaari mo bang ulitin ang tanong?"
 
     return jsonify({"reply": reply, "size": selected_size})
 
