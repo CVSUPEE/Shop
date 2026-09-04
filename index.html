@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Athletica</title>
+    <title>CVSPEE</title>
 
     
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Athletica">
-    <meta property="og:title" content="Athletica - Athlete's Choice">
-    <meta property="og:description" content="Shop premium sports apparel and gear at Athletica.">
+    <meta property="og:site_name" content="CVSPEE">
+    <meta property="og:title" content="CVSPEE - Athlete's Choice">
+    <meta property="og:description" content="Shop premium sports apparel and gear at CVSPEE.">
     <meta property="og:image" content="https://jhaydiazu113-sudo.github.io/images/logo.png">
     <meta property="og:url" content="https://jhaydiazu113-sudo.github.io/">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Athletica - Athlete's Choice">
+    <meta name="twitter:title" content="CVSPEE - Athlete's Choice">
     <meta name="twitter:image" content="https://jhaydiazu113-sudo.github.io/images/logo.png">
 
     <link rel="icon" type="image/png" href="images/logo.png">
@@ -845,10 +845,21 @@ body.dark-mode .avatar-upload-btn {
     border-color: #1e1e1e;
 }
 
-body.dark-mode .account-order-link {
+body.dark-mode .account-icon-menu {
+    border-bottom-color: #2a2a2a;
+}
+
+body.dark-mode .account-icon-circle {
     background: #1e1e1e;
-    border-color: #2a2a2a;
+    color: #4caf7d;
+}
+
+body.dark-mode .account-icon-label {
     color: #ddd;
+}
+
+body.dark-mode .account-icon-dot {
+    border-color: #121212;
 }
 
 body.dark-mode .order-tracking-tabs {
@@ -857,6 +868,18 @@ body.dark-mode .order-tracking-tabs {
 
 body.dark-mode .order-row {
     border-color: #2a2a2a;
+}
+
+body.dark-mode .msg-list-row {
+    border-color: #2a2a2a;
+}
+
+body.dark-mode .msg-list-row-unread {
+    background: #17241b;
+}
+
+body.dark-mode .msg-list-preview {
+    color: #999;
 }
 
 body.dark-mode .review-order-card {
@@ -2359,31 +2382,147 @@ body.dark-mode .confirm-overlay {
     cursor: pointer;
 }
 
-.account-order-link {
+.account-icon-menu {
     display: flex;
+    align-items: flex-start;
+    gap: 22px;
+    overflow-x: auto;
+    padding: 18px 2px 22px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.account-icon-menu::-webkit-scrollbar {
+    display: none;
+}
+
+.account-icon-item {
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 10px;
-    padding: 14px 16px;
-    margin-bottom: 16px;
+    gap: 8px;
+    flex-shrink: 0;
+    width: 76px;
+    background: none;
+    border: none;
     cursor: pointer;
     font-family: inherit;
-    font-size: 15px;
-    font-weight: 600;
-    color: #222;
+    padding: 0;
+}
+
+.account-icon-circle {
+    position: relative;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: #eafaf0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #145A32;
+    transition: transform 0.2s ease;
+}
+
+.account-icon-item:hover .account-icon-circle {
+    transform: translateY(-3px);
+}
+
+.account-icon-circle svg {
+    width: 22px;
+    height: 22px;
+}
+
+.account-icon-dot {
+    display: none;
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #e53935;
+    border: 2px solid #fff;
+}
+
+.account-icon-label {
+    font-size: 12.5px;
+    color: #333;
+    text-align: center;
+    line-height: 1.25;
+}
+
+.messages-list-box {
+    max-width: 460px;
+    text-align: left;
+}
+
+.msg-list-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.msg-list-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    cursor: pointer;
     transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.account-order-link:hover {
+.msg-list-row:hover {
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
     border-color: #145A32;
 }
 
-.account-order-link .account-order-link-arrow {
-    color: #999;
+.msg-list-row-unread {
+    border-color: #145A32;
+    background: #f4faf6;
+}
+
+.msg-list-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.msg-list-name {
+    font-weight: 600;
+    color: #222;
     font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.msg-list-preview {
+    font-size: 13px;
+    color: #888;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.msg-list-row-unread .msg-list-preview {
+    color: #333;
+    font-weight: 500;
+}
+
+.msg-list-unread-badge {
+    background: #e53935;
+    color: #fff;
+    font-size: 10px;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    flex-shrink: 0;
 }
 
 .order-tracking-box {
@@ -4493,7 +4632,6 @@ body.dark-mode .wishlist-item {
         })();
     </script>
 
-    <script src="https://accounts.google.com/gsi/client"></script>
 </head>
 
 <body id="home">
@@ -4509,16 +4647,7 @@ body.dark-mode .wishlist-item {
             <button class="auth-tab" id="tabSignup" onclick="switchAuthTab('signup')">Sign Up</button>
         </div>
 
-        <p class="auth-subtitle" id="authSubtitle">Sign in or create an account to continue to Athletica.</p>
-
-        <div class="auth-social" id="authSocial">
-            <div id="googleSignInDiv" class="google-signin-wrap"></div>
-            <button type="button" class="social-btn facebook-btn" onclick="socialLogin('facebook')">
-                <i class="fa-brands fa-facebook-f"></i> Continue with Facebook
-            </button>
-        </div>
-
-        <div class="auth-divider" id="authDivider"><span>or use your email</span></div>
+        <p class="auth-subtitle" id="authSubtitle">Sign in or create an account to continue to CVSPEE.</p>
 
         <form id="signinForm" class="auth-form active" onsubmit="return handleSignIn(event)">
             <input type="text" id="signinEmail" placeholder="Username or Email" autocomplete="username" required>
@@ -4530,7 +4659,7 @@ body.dark-mode .wishlist-item {
 
         <form id="signupForm" class="auth-form" onsubmit="return handleSignUp(event)">
             <input type="text" id="signupName" placeholder="Full Name" required>
-            <input type="text" id="signupUsername" placeholder="Username (e.g. @Athletica2026)" required>
+            <input type="text" id="signupUsername" placeholder="Username (e.g. @CVSPEE2026)" required>
             <input type="email" id="signupEmail" placeholder="Email" required>
             <input type="password" id="signupPassword" placeholder="Password (min 6 characters)" required>
             <select id="signupRole" required onchange="toggleSignupStudentId()">
@@ -4554,21 +4683,6 @@ body.dark-mode .wishlist-item {
                 <span class="resend-check" id="signupResendCheck">&#10003; Sent</span>
             </span>
             <a href="#" class="auth-link" onclick="switchAuthTab('signup'); return false;">Back</a>
-        </form>
-
-        <form id="signupGoogleNameForm" class="auth-form" onsubmit="return handleGoogleSignupName(event)">
-            <p class="auth-note" id="signupGoogleNameNote"></p>
-            <input type="text" id="signupGoogleFullName" placeholder="Full Name" required>
-            <input type="text" id="signupGoogleUsername" placeholder="Username (e.g. @Athletica2026)" required>
-            <select id="signupGoogleRole" required onchange="toggleSignupGoogleStudentId()">
-                <option value="" disabled selected>I am a...</option>
-                <option value="Teacher">Teacher</option>
-                <option value="Student">Student</option>
-            </select>
-            <input type="text" id="signupGoogleStudentId" placeholder="Student ID" style="display:none;">
-            <p class="auth-error" id="signupGoogleNameError"></p>
-            <button type="submit" class="btn auth-submit">Finish Sign Up</button>
-            <a href="#" class="auth-link" onclick="switchAuthTab('signup'); return false;">Cancel</a>
         </form>
 
         <form id="forgotEmailForm" class="auth-form" onsubmit="return handleForgotEmail(event)">
@@ -4810,7 +4924,7 @@ body.dark-mode .wishlist-item {
             <img id="chatProductImg" src="" alt="">
             <div class="chat-header-info">
                 <h4 id="chatProductName"></h4>
-                <p class="chat-header-sub">Athletica Assistant</p>
+                <p class="chat-header-sub">CVSPEE Assistant</p>
             </div>
         </div>
 
@@ -4857,6 +4971,22 @@ body.dark-mode .wishlist-item {
         </div>
 
         <div class="orders-panel-list" id="ordersPanelList"></div>
+
+    </div>
+
+</div>
+
+<div class="modal-overlay" id="orderHistoryOverlay">
+
+    <div class="modal-box orders-panel-box">
+
+        <button type="button" class="modal-close" onclick="closeOrderHistory()">&times;</button>
+
+        <div class="orders-panel-header">
+            <h3>Order History</h3>
+        </div>
+
+        <div class="orders-panel-list" id="orderHistoryList"></div>
 
     </div>
 
@@ -5224,6 +5354,20 @@ body.dark-mode .wishlist-item {
 
 </div>
 
+<div class="modal-overlay" id="messagesListOverlay">
+
+    <div class="modal-box messages-list-box">
+
+        <button type="button" class="modal-close" onclick="closeMessagesList()">&times;</button>
+
+        <h3>Message</h3>
+
+        <div class="msg-list-body" id="messagesListBody"></div>
+
+    </div>
+
+</div>
+
 <header class="site-navbar">
 
     <div class="container">
@@ -5237,7 +5381,7 @@ body.dark-mode .wishlist-item {
             </button>
 
             <div class="logo">
-                <img src="images/logo.png" alt="Athletica">
+                <img src="images/logo.png" alt="CVSPEE">
             </div>
 
             <nav>
@@ -5286,7 +5430,7 @@ body.dark-mode .wishlist-item {
 
 <aside class="side-menu" id="sideMenu">
     <div class="side-menu-header">
-        <img src="images/logo.png" alt="Athletica" class="side-menu-logo">
+        <img src="images/logo.png" alt="CVSPEE" class="side-menu-logo">
         <button class="side-menu-close" onclick="closeSideMenu()" aria-label="Close menu">&times;</button>
     </div>
     <ul class="side-menu-list">
@@ -5297,7 +5441,7 @@ body.dark-mode .wishlist-item {
         <li><a href="#">TEMPLATE 5</a></li>
         <li><a href="#">TEMPLATE 6</a></li>
         <li><a href="#">TEMPLATE 7</a></li>
-        <li id="orderManagementMenuItem" style="display:none;"><a href="https://jhaydiazu113-sudo.github.io/OrderManagement/" target="_blank" rel="noopener">ORDER MANAGEMENT</a></li>
+        <li id="orderManagementMenuItem" style="display:none;"><a href="https://cvsupee.github.io/Panel/" target="_blank" rel="noopener">Admib/Seller PANEL</a></li>
         <li id="promoManagerMenuItem" style="display:none;"><a href="#" onclick="closeSideMenu(); openPromoManager(); return false;">Promo Codes</a></li>
     </ul>
 
@@ -5323,7 +5467,7 @@ body.dark-mode .wishlist-item {
             <div class="col-2">
 
                 <h1>
-                    What's Up, Welcome to Athletica
+                    What's Up, Welcome to CVSPEE
                 </h1>
 
                 <p>
@@ -5436,7 +5580,7 @@ body.dark-mode .wishlist-item {
             <div class="col-2">
 
                 <p>
-                    Exclusive Available on Athletica
+                    Exclusive Available on CVSPEE
                 </p>
 
                 <br>
@@ -5484,7 +5628,7 @@ body.dark-mode .wishlist-item {
                 <h1>❝</h1>
 
                 <p>
-                    Austine is an investor in Athletica,
+                    Austine is an investor in CVSPEE,
                     backing its mission to enhance athletic
                     performance through smart, data-driven
                     training tools. With a keen interest in
@@ -5511,7 +5655,7 @@ body.dark-mode .wishlist-item {
 
                 <p>
                     Christian Josh Coele is an investor in
-                    Athletica, supporting its vision to empower
+                    CVSPEE, supporting its vision to empower
                     athletes through intelligent training solutions.
                     With a strong interest in performance technology
                     and innovation, he contributes to the company’s
@@ -5535,7 +5679,7 @@ body.dark-mode .wishlist-item {
                 <h1>❝</h1>
 
                 <p>
-                    Justine Paul Villamor is an investor in Athletica,
+                    Justine Paul Villamor is an investor in CVSPEE,
                     backing the company’s commitment to innovation
                     in athletic performance. Her support reflects
                     a belief in the power of data-driven training
@@ -5594,13 +5738,13 @@ body.dark-mode .wishlist-item {
     <div class="small-container">
 
         <h2 class="title">
-            About Athletica
+            About CVSPEE
         </h2>
 
         <div class="info-content">
 
             <p>
-                Athletica is a sports and activewear brand dedicated
+                CVSPEE is a sports and activewear brand dedicated
                 to providing comfortable, stylish, and performance-focused
                 products for athletes and fitness enthusiasts.
             </p>
@@ -5633,19 +5777,15 @@ body.dark-mode .wishlist-item {
 
             <p>
                 Have questions about our products?
-                Feel free to contact the Athletica team.
+                Feel free to contact the CVSPEE team.
             </p>
 
             <p>
-                📘 Facebook: Athletica Shop
+                📘 Facebook: CVSPEE Shop
             </p>
 
             <p>
-                📸 Instagram: Athletica_Shop
-            </p>
-
-            <p>
-                📧 Email: AthleticaCVSU@gmail.com
+                📧 Email: CVSPEEshop@gmail.com
             </p>
 
             <p>
@@ -5745,7 +5885,7 @@ body.dark-mode .wishlist-item {
 
             <p>
                 We want you to be happy with your order. Here's how returns and
-                refunds work at Athletica.
+                refunds work at CVSPEE.
             </p>
 
             <p>
@@ -5802,7 +5942,7 @@ body.dark-mode .wishlist-item {
         <div class="info-content">
 
             <p>
-                Athletica is a student project store operated by the group members
+                CVSPEE is a student project store operated by the group members
                 listed in our footer. This page explains what information we collect
                 and how orders are handled.
             </p>
@@ -5820,7 +5960,7 @@ body.dark-mode .wishlist-item {
                 We currently accept manual payment confirmation through GCash
                 or Cash on Delivery. We never ask for your full card number,
                 bank PIN, or one-time passwords (OTP). If anyone asks you for these
-                while claiming to be Athletica, please contact us immediately using
+                while claiming to be CVSPEE, please contact us immediately using
                 the details on our Contact page.
             </p>
 
@@ -5850,10 +5990,32 @@ body.dark-mode .wishlist-item {
 
     <div class="small-container">
 
-        <button type="button" class="account-order-link" onclick="openOrderTracking()">
-            <span>Order</span>
-            <span class="account-order-link-arrow">&#8250;</span>
-        </button>
+        <div class="account-icon-menu">
+
+            <button type="button" class="account-icon-item" onclick="openOrderTracking()">
+                <span class="account-icon-circle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M9 8h6"></path><path d="M9 12h6"></path><path d="M9 16h4"></path></svg>
+                    <span class="account-icon-dot" id="accountOrderDot"></span>
+                </span>
+                <span class="account-icon-label">Order</span>
+            </button>
+
+            <button type="button" class="account-icon-item" onclick="openOrderHistory()">
+                <span class="account-icon-circle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path><path d="M12 8v4l3 2"></path></svg>
+                </span>
+                <span class="account-icon-label">Order History</span>
+            </button>
+
+            <button type="button" class="account-icon-item" onclick="openMessagesList()">
+                <span class="account-icon-circle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path><circle cx="8" cy="12" r="0.6" fill="currentColor" stroke="none"></circle><circle cx="12" cy="12" r="0.6" fill="currentColor" stroke="none"></circle><circle cx="16" cy="12" r="0.6" fill="currentColor" stroke="none"></circle></svg>
+                    <span class="account-icon-dot" id="accountMsgDot"></span>
+                </span>
+                <span class="account-icon-label">Message</span>
+            </button>
+
+        </div>
 
         <h2 class="title">
             Account
@@ -5966,7 +6128,7 @@ body.dark-mode .wishlist-item {
         <hr>
 
         <p class="Copyright">
-            © 2025 Athletica. All rights reserved.
+            © 2025 CVSPEE. All rights reserved.
         </p>
 
     </div>
@@ -6365,7 +6527,7 @@ body.dark-mode .wishlist-item {
         if (!exists) {
             updateUsers(function (users) {
                 if (users.some(function (u) { return u.email === OWNER_EMAIL; })) return users;
-                users.push({ name: "Athletica Owner", username: "@AthleticaOwner", email: OWNER_EMAIL, password: OWNER_PASSWORD, avatar: "", isOwner: true });
+                users.push({ name: "CVSPEE Owner", username: "@CVSPEEOwner", email: OWNER_EMAIL, password: OWNER_PASSWORD, avatar: "", isOwner: true });
                 return users;
             });
         }
@@ -6396,10 +6558,9 @@ body.dark-mode .wishlist-item {
     }
 
     var authSubtitles = {
-        signin: "Sign in or create an account to continue to Athletica.",
-        signup: "Sign in or create an account to continue to Athletica.",
+        signin: "Sign in or create an account to continue to CVSPEE.",
+        signup: "Sign in or create an account to continue to CVSPEE.",
         signupVerify: "Verify your email to finish creating your account.",
-        signupGoogleName: "Almost done! Enter your full name to finish creating your account.",
         forgotEmail: "Reset your password.",
         forgotReset: "Enter the code we sent and choose a new password."
     };
@@ -6417,21 +6578,17 @@ body.dark-mode .wishlist-item {
         document.getElementById("signinForm").classList.toggle("active", tab === "signin");
         document.getElementById("signupForm").classList.toggle("active", tab === "signup");
         document.getElementById("signupVerifyForm").classList.toggle("active", tab === "signupVerify");
-        document.getElementById("signupGoogleNameForm").classList.toggle("active", tab === "signupGoogleName");
         document.getElementById("forgotEmailForm").classList.toggle("active", tab === "forgotEmail");
         document.getElementById("forgotResetForm").classList.toggle("active", tab === "forgotReset");
 
         var isBaseStep = (tab === "signin" || tab === "signup");
         document.getElementById("authTabs").style.display = isBaseStep ? "flex" : "none";
-        document.getElementById("authSocial").style.display = isBaseStep ? "flex" : "none";
-        document.getElementById("authDivider").style.display = isBaseStep ? "flex" : "none";
         document.getElementById("authSkip").style.display = isBaseStep ? "inline-block" : "none";
         document.getElementById("authOwnerSkip").style.display = isBaseStep ? "inline-block" : "none";
 
         document.getElementById("authSubtitle").textContent = authSubtitles[tab] || "";
 
         if (tab === "signup") toggleSignupStudentId();
-        if (tab === "signupGoogleName") toggleSignupGoogleStudentId();
     }
 
     function generateCode() {
@@ -6445,17 +6602,9 @@ body.dark-mode .wishlist-item {
         if (role !== "Student") field.value = "";
     }
 
-    function toggleSignupGoogleStudentId() {
-        var role = document.getElementById("signupGoogleRole").value;
-        var field = document.getElementById("signupGoogleStudentId");
-        field.style.display = (role === "Student") ? "block" : "none";
-        if (role !== "Student") field.value = "";
-    }
-
     function openAuthModal() {
         authOverlay.classList.add("show");
         toggleSignupStudentId();
-        toggleSignupGoogleStudentId();
     }
 
     function closeAuthModal(e) {
@@ -6475,7 +6624,7 @@ body.dark-mode .wishlist-item {
         var errorEl = document.getElementById("signupError");
 
         if (!isValidUsername(username)) {
-            errorEl.textContent = "Username must start with @ and be 3-20 letters, numbers, or underscores (e.g. @Athletica2026).";
+            errorEl.textContent = "Username must start with @ and be 3-20 letters, numbers, or underscores (e.g. @CVSPEE2026).";
             return false;
         }
 
@@ -6778,176 +6927,6 @@ body.dark-mode .wishlist-item {
         return false;
     }
 
-    var GOOGLE_CLIENT_ID = "564848019049-htke8huue71l4vos7qgg20ou81d9dnfq.apps.googleusercontent.com";
-
-    function parseJwt(token) {
-        var base64Url = token.split(".")[1];
-        var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-        var jsonPayload = decodeURIComponent(
-            atob(base64)
-                .split("")
-                .map(function (c) {
-                    return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-                })
-                .join("")
-        );
-        return JSON.parse(jsonPayload);
-    }
-
-    function handleGoogleCredentialResponse(response) {
-        var payload = parseJwt(response.credential);
-        var email = (payload.email || "").toLowerCase();
-        var picture = payload.picture || "";
-
-        if (!email) return;
-
-        var users = getUsers();
-        var found = null;
-
-        for (var i = 0; i < users.length; i++) {
-            if (users[i].email === email) { found = users[i]; break; }
-        }
-
-        if (currentAuthMode === "signup") {
-            if (found) {
-                document.getElementById("signupError").textContent =
-                    "An account already exists for this Google account. Please sign in instead.";
-                return;
-            }
-
-            localStorage.setItem("athletica_pending_google_signup", JSON.stringify({
-                email: email, picture: picture
-            }));
-
-            document.getElementById("signupGoogleNameNote").textContent =
-                "Connected to Google as " + email + ".";
-            document.getElementById("signupGoogleFullName").value = "";
-            document.getElementById("signupGoogleNameError").textContent = "";
-
-            switchAuthTab("signupGoogleName");
-            return;
-        }
-
-        if (!found) {
-            document.getElementById("signinError").textContent =
-                "No Athletica account is linked to this Google account yet. Please sign up first.";
-            return;
-        }
-
-        if (!found.avatar && picture) {
-            updateUsers(function (users2) {
-                var u = users2.find(function (u) { return u.email === email; });
-                if (u && !u.avatar) u.avatar = picture;
-                return users2;
-            }, function () {
-                setCurrentUser(email);
-                closeAuthModal();
-                renderAccount();
-            });
-            return;
-        }
-
-        setCurrentUser(email);
-        closeAuthModal();
-        renderAccount();
-    }
-
-    function handleGoogleSignupName(e) {
-        e.preventDefault();
-
-        var name = document.getElementById("signupGoogleFullName").value.trim();
-        var username = normalizeUsername(document.getElementById("signupGoogleUsername").value);
-        var role = document.getElementById("signupGoogleRole").value;
-        var studentId = document.getElementById("signupGoogleStudentId").value.trim();
-        var errorEl = document.getElementById("signupGoogleNameError");
-        var pending = JSON.parse(localStorage.getItem("athletica_pending_google_signup") || "null");
-
-        if (!pending) {
-            errorEl.textContent = "Your sign-up session expired. Please try again.";
-            switchAuthTab("signup");
-            return false;
-        }
-
-        if (!name) {
-            errorEl.textContent = "Please enter your full name.";
-            return false;
-        }
-
-        if (!isValidUsername(username)) {
-            errorEl.textContent = "Username must start with @ and be 3-20 letters, numbers, or underscores (e.g. @Athletica2026).";
-            return false;
-        }
-
-        if (isUsernameTaken(username, pending.email)) {
-            errorEl.textContent = "That username is already taken. Please choose another.";
-            return false;
-        }
-
-        if (!role) {
-            errorEl.textContent = "Please select whether you are a Teacher or Student.";
-            return false;
-        }
-
-        if (role === "Student" && !studentId) {
-            errorEl.textContent = "Please enter your Student ID.";
-            return false;
-        }
-
-        updateUsers(function (users) {
-            var alreadyExists = users.some(function (u) { return u.email === pending.email; });
-            if (!alreadyExists) {
-                users.push({ name: name, username: username, email: pending.email, password: "", role: role, studentId: studentId || "", avatar: pending.picture || "" });
-            }
-            return users;
-        }, function () {
-            localStorage.removeItem("athletica_pending_google_signup");
-            errorEl.textContent = "";
-            setCurrentUser(pending.email);
-            closeAuthModal();
-            renderAccount();
-        });
-
-        return false;
-    }
-
-    if (window.google && google.accounts && google.accounts.id) {
-        google.accounts.id.initialize({
-            client_id: GOOGLE_CLIENT_ID,
-            callback: handleGoogleCredentialResponse
-        });
-        google.accounts.id.renderButton(
-            document.getElementById("googleSignInDiv"),
-            { theme: "outline", size: "large", shape: "pill", text: "continue_with", width: 300 }
-        );
-    }
-
-    function socialLogin(provider) {
-        var email = provider + "user@" + provider + ".com";
-        var found = getUsers().some(function (u) { return u.email === email; });
-
-        function proceed() {
-            setCurrentUser(email);
-            closeAuthModal();
-            renderAccount();
-        }
-
-        if (!found) {
-            updateUsers(function (users) {
-                if (users.some(function (u) { return u.email === email; })) return users;
-                users.push({
-                    name: provider.charAt(0).toUpperCase() + provider.slice(1) + " User",
-                    username: "@" + provider + "user",
-                    email: email,
-                    password: "",
-                    avatar: ""
-                });
-                return users;
-            }, proceed);
-        } else {
-            proceed();
-        }
-    }
-
     function logout() {
         localStorage.removeItem("athletica_current_user");
         applyDarkMode(false);
@@ -7114,8 +7093,8 @@ body.dark-mode .wishlist-item {
 
             container.innerHTML =
                 '<div class="account-box">' +
-                    '<h3>Welcome to Athletica</h3>' +
-                    '<p>Sign in or create an account to manage your Athletica orders and profile.</p>' +
+                    '<h3>Welcome to CVSPEE</h3>' +
+                    '<p>Sign in or create an account to manage your CVSPEE orders and profile.</p>' +
                     '<a href="#" class="btn" onclick="openAuthModal(); return false;">Sign In / Sign Up</a>' +
                 '</div>';
             refreshOrderUI();
@@ -7218,7 +7197,7 @@ body.dark-mode .wishlist-item {
     var DEFAULT_PRODUCTS = {
         tracksuit: {
             id: "tracksuit",
-            name: "Athletica Tracksuits",
+            name: "CVSPEE Tracksuits",
             price: 1119,
             image: "images/product-1.png",
             description: "A comfortable, breathable tracksuit built for warm-ups, travel, and everyday training. Soft fleece lining keeps you warm without weighing you down.",
@@ -7227,7 +7206,7 @@ body.dark-mode .wishlist-item {
         },
         jersey: {
             id: "jersey",
-            name: "Athletica Training Jersey",
+            name: "CVSPEE Training Jersey",
             price: 699,
             image: "images/TJ.jpg",
             description: "A lightweight, moisture-wicking jersey designed to keep you cool and dry through your toughest training sessions.",
@@ -7236,7 +7215,7 @@ body.dark-mode .wishlist-item {
         },
         shorts: {
             id: "shorts",
-            name: "Athletica Training Shorts",
+            name: "CVSPEE Training Shorts",
             price: 399,
             image: "images/ATS.png",
             description: "Flexible, quick-drying training shorts with a comfortable stretch fit — built for movement, not restriction.",
@@ -7245,7 +7224,7 @@ body.dark-mode .wishlist-item {
         },
         shoes: {
             id: "shoes",
-            name: "Athletica Jogging Shoes",
+            name: "CVSPEE Jogging Shoes",
             price: 999,
             image: "images/AJS.jpg",
             description: "Cushioned jogging shoes with responsive support, made for daily runs and long training days.",
@@ -8876,7 +8855,7 @@ body.dark-mode .wishlist-item {
     var selectedPaymentMethod = null;
 
     var PROMO_CODES = {
-        "ATHLETICA10": { type: "percent", value: 10, label: "10% off" },
+        "CVSPEE10": { type: "percent", value: 10, label: "10% off" },
         "WELCOME15": { type: "percent", value: 15, label: "15% off" },
         "SAVE50": { type: "fixed", value: 50, label: "₱50 off" }
     };
@@ -9513,7 +9492,7 @@ body.dark-mode .wishlist-item {
             }
 
             document.getElementById("paymentConfirmText").textContent =
-                "Paid via " + selectedPaymentMethod + " — total ₱" + checkoutOrder.total.toFixed(2) + ". Thank you for shopping with Athletica! We'll notify you once the owner approves your order.";
+                "Paid via " + selectedPaymentMethod + " — total ₱" + checkoutOrder.total.toFixed(2) + ". Thank you for shopping with CVSPEE! We'll notify you once the owner approves your order.";
 
             goToPaymentStep("paymentStepConfirm");
             playOrderConfirmAnimation();
@@ -9807,6 +9786,77 @@ body.dark-mode .wishlist-item {
         saveOrdersList(orders.filter(function (o) { return idsToRemove.indexOf(o.id) === -1; }));
         renderOrdersPanel();
         refreshOrderUI();
+    }
+
+    function openOrderHistory() {
+        var user = getCurrentUser();
+        if (!user) {
+            openAuthModal();
+            return;
+        }
+
+        renderOrderHistory();
+        document.getElementById("orderHistoryOverlay").classList.add("show");
+    }
+
+    function closeOrderHistory() {
+        document.getElementById("orderHistoryOverlay").classList.remove("show");
+    }
+
+    function renderOrderHistory() {
+        var user = getCurrentUser();
+        if (!user) return;
+
+        var listEl = document.getElementById("orderHistoryList");
+        var orders = getOrders();
+
+        if (user.isOwner) {
+            
+        } else if (user.isSeller) {
+            orders = orders.filter(function (o) { return getOrderRoleFor(o, user) !== "none"; });
+        } else {
+            orders = orders.filter(function (o) { return o.buyerEmail === user.email; });
+        }
+
+        orders = orders.slice().reverse();
+
+        if (orders.length === 0) {
+            var emptyText = user.isOwner
+                ? "No orders yet."
+                : (user.isSeller ? "No orders yet." : "You haven't placed any orders yet.");
+            listEl.innerHTML = '<p class="orders-panel-empty">' + emptyText + '</p>';
+            return;
+        }
+
+        listEl.innerHTML = orders.map(function (o) {
+            var role = getOrderRoleFor(o, user);
+            var statusLabel = o.status === "pending" ? "Pending Approval" : (o.status === "confirmed" ? "Confirmed" : (o.status === "delivered" ? "Delivered" : "Cancelled"));
+
+            var sellerNote = "";
+            if (o.sellerEmail && (role === "owner" || role === "seller-assigned")) {
+                sellerNote = '<div class="order-row-seller-note">Handled by: ' + escapeHtml(o.sellerName || "Seller") + '</div>';
+            }
+
+            var innerHtml =
+                '<div class="order-row-top">' +
+                    '<strong>₱' + o.total.toFixed(2) + '</strong>' +
+                    '<span class="order-status order-status-' + o.status + '">' + statusLabel + '</span>' +
+                '</div>' +
+                '<div class="order-row-items">' + escapeHtml(orderSummaryText(o)) + '</div>' +
+                sellerNote +
+                '<div class="order-row-footer">' +
+                    '<div class="order-row-buyer">' +
+                        (user.isOwner
+                            ? '<span class="buyer-name-link" onclick="openUserProfileView(\'' + escapeHtml(o.buyerEmail || "") + '\', \'' + escapeHtml(o.buyerName || "") + '\', event)">' + escapeHtml(o.buyerName) + '</span> — '
+                            : (role === "seller-pending" || role === "seller-assigned"
+                                ? escapeHtml(o.buyerName || "") + ' — '
+                                : '')) +
+                        escapeHtml(o.date) +
+                    '</div>' +
+                '</div>';
+
+            return '<div class="order-row" onclick="openOrderAction(\'' + o.id + '\')">' + innerHtml + '</div>';
+        }).join("");
     }
 
     var orderTrackingTab = "toship";
@@ -10392,7 +10442,7 @@ body.dark-mode .wishlist-item {
         } else if (isSellerView) {
             titleEl.textContent = escapeHtml(order.buyerName) + " — Order";
         } else {
-            titleEl.textContent = "Athletica — Your Order";
+            titleEl.textContent = "CVSPEE — Your Order";
         }
         document.getElementById("orderActionSub").textContent = itemsText;
 
@@ -10513,7 +10563,7 @@ body.dark-mode .wishlist-item {
         var myRole = chatSenderRoleFor(order, user);
         var otherRole = otherChatPartyRole(order, myRole);
         var otherEmail = otherChatPartyEmail(order, otherRole);
-        var fallbackName = otherRole === "buyer" ? order.buyerName : (otherRole === "seller" ? (order.sellerName || "Seller") : "Athletica");
+        var fallbackName = otherRole === "buyer" ? order.buyerName : (otherRole === "seller" ? (order.sellerName || "Seller") : "CVSPEE");
         var fallbackAvatar = otherRole === "buyer" ? order.buyerAvatar : "";
 
         var name = liveNameFor(otherEmail, fallbackName) || fallbackName;
@@ -10690,6 +10740,111 @@ body.dark-mode .wishlist-item {
         return result;
     }
 
+    function getAllDmThreadsFor(email) {
+        var dms = getDms();
+        var result = [];
+        Object.keys(dms).forEach(function (convId) {
+            var conv = dms[convId];
+            if (!conv || !conv.participants || conv.participants.indexOf(email) === -1) return;
+            var otherEmail = conv.participants[0] === email ? conv.participants[1] : conv.participants[0];
+            var seenAt = (conv.seenAt && conv.seenAt[email]) || 0;
+            var messages = conv.messages || [];
+            var unread = messages.filter(function (m) {
+                return m.sender !== email && (m.ts || 0) > seenAt;
+            }).length;
+            var lastMsg = messages.length ? messages[messages.length - 1] : null;
+            result.push({
+                convId: convId,
+                otherEmail: otherEmail,
+                unread: unread,
+                lastText: lastMsg ? lastMsg.text : "",
+                lastTs: lastMsg ? (lastMsg.ts || 0) : 0
+            });
+        });
+        result.sort(function (a, b) { return b.lastTs - a.lastTs; });
+        return result;
+    }
+
+    function openMessagesList() {
+        var user = getCurrentUser();
+        if (!user) {
+            openAuthModal();
+            return;
+        }
+
+        document.getElementById("userProfileViewOverlay").classList.remove("show");
+        document.getElementById("orderActionOverlay").classList.remove("show");
+        document.getElementById("dmOverlay").classList.remove("show");
+        document.getElementById("messagesListOverlay").classList.add("show");
+
+        renderMessagesList();
+    }
+
+    function closeMessagesList() {
+        document.getElementById("messagesListOverlay").classList.remove("show");
+    }
+
+    function renderMessagesList() {
+        var user = getCurrentUser();
+        var listEl = document.getElementById("messagesListBody");
+        if (!listEl || !user) return;
+
+        var threads = getAllDmThreadsFor(user.email);
+
+        if (threads.length === 0) {
+            listEl.innerHTML = '<p class="review-empty">No conversations yet.</p>';
+            return;
+        }
+
+        listEl.innerHTML = threads.map(function (t) {
+            var name = liveNameFor(t.otherEmail, t.otherEmail) || t.otherEmail;
+            var avatar = liveAvatarFor(t.otherEmail, "");
+            var initials = name.trim().charAt(0).toUpperCase() || "?";
+            var avatarHtml = avatar
+                ? '<img src="' + avatar + '" alt="">'
+                : '<div class="chat-with-avatar-initials">' + escapeHtml(initials) + '</div>';
+            var online = isUserOnline(t.otherEmail);
+            var preview = t.lastText ? escapeHtml(t.lastText) : "Say hi to start the conversation.";
+
+            return (
+                '<div class="msg-list-row' + (t.unread > 0 ? ' msg-list-row-unread' : '') + '" onclick="openDirectMessage(\'' + escapeHtml(t.otherEmail) + '\', \'' + escapeHtml(name) + '\')">' +
+                    '<div class="chat-with-avatar-wrap">' +
+                        avatarHtml +
+                        '<span class="presence-dot' + (online ? ' online' : '') + '"></span>' +
+                    '</div>' +
+                    '<div class="msg-list-info">' +
+                        '<div class="msg-list-name">' + escapeHtml(name) + '</div>' +
+                        '<div class="msg-list-preview">' + preview + '</div>' +
+                    '</div>' +
+                    (t.unread > 0 ? '<span class="msg-list-unread-badge">' + t.unread + '</span>' : '') +
+                '</div>'
+            );
+        }).join("");
+    }
+
+    function updateAccountIconDots() {
+        var orderDotEl = document.getElementById("accountOrderDot");
+        var msgDotEl = document.getElementById("accountMsgDot");
+        var user = getCurrentUser();
+
+        if (!user) {
+            if (orderDotEl) orderDotEl.style.display = "none";
+            if (msgDotEl) msgDotEl.style.display = "none";
+            return;
+        }
+
+        if (orderDotEl) {
+            var orders = getOrders();
+            var hasUnreadOrder = orders.some(function (o) { return isOrderUnreadFor(o, user); });
+            orderDotEl.style.display = hasUnreadOrder ? "block" : "none";
+        }
+
+        if (msgDotEl) {
+            var hasUnreadMsg = getAllDmThreadsFor(user.email).some(function (t) { return t.unread > 0; });
+            msgDotEl.style.display = hasUnreadMsg ? "block" : "none";
+        }
+    }
+
     function openDirectMessage(email, name) {
         var user = getCurrentUser();
         if (!user) {
@@ -10703,6 +10858,7 @@ body.dark-mode .wishlist-item {
 
         document.getElementById("userProfileViewOverlay").classList.remove("show");
         document.getElementById("orderActionOverlay").classList.remove("show");
+        document.getElementById("messagesListOverlay").classList.remove("show");
         document.getElementById("dmOverlay").classList.add("show");
 
         renderDmMessages();
@@ -10915,6 +11071,7 @@ body.dark-mode .wishlist-item {
     function refreshOrderUI() {
         updateNotifBadge();
         renderChatHeadDock();
+        updateAccountIconDots();
 
         if (document.getElementById("ordersPanelOverlay").classList.contains("show")) {
             renderOrdersPanel();
@@ -10924,6 +11081,12 @@ body.dark-mode .wishlist-item {
         }
         if (document.getElementById("orderActionOverlay").classList.contains("show") && currentOrderActionId) {
             renderOrderAction();
+        }
+        if (document.getElementById("messagesListOverlay").classList.contains("show")) {
+            renderMessagesList();
+        }
+        if (document.getElementById("orderHistoryOverlay").classList.contains("show")) {
+            renderOrderHistory();
         }
     }
 
