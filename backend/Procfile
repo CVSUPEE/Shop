@@ -1,1 +1,1 @@
-web: python product-chat-server.py
+web: python cvspee-chat-server.py
