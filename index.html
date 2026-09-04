@@ -4533,11 +4533,12 @@ body.dark-mode .wishlist-item {
             <input type="text" id="signupUsername" placeholder="Username (e.g. @Athletica2026)" required>
             <input type="email" id="signupEmail" placeholder="Email" required>
             <input type="password" id="signupPassword" placeholder="Password (min 6 characters)" required>
-            <select id="signupRole" required>
+            <select id="signupRole" required onchange="toggleSignupStudentId()">
                 <option value="" disabled selected>I am a...</option>
                 <option value="Teacher">Teacher</option>
                 <option value="Student">Student</option>
             </select>
+            <input type="text" id="signupStudentId" placeholder="Student ID" style="display:none;">
             <p class="auth-error" id="signupError"></p>
             <button type="submit" class="btn auth-submit">Send Verification Code</button>
         </form>
@@ -4559,11 +4560,12 @@ body.dark-mode .wishlist-item {
             <p class="auth-note" id="signupGoogleNameNote"></p>
             <input type="text" id="signupGoogleFullName" placeholder="Full Name" required>
             <input type="text" id="signupGoogleUsername" placeholder="Username (e.g. @Athletica2026)" required>
-            <select id="signupGoogleRole" required>
+            <select id="signupGoogleRole" required onchange="toggleSignupGoogleStudentId()">
                 <option value="" disabled selected>I am a...</option>
                 <option value="Teacher">Teacher</option>
                 <option value="Student">Student</option>
             </select>
+            <input type="text" id="signupGoogleStudentId" placeholder="Student ID" style="display:none;">
             <p class="auth-error" id="signupGoogleNameError"></p>
             <button type="submit" class="btn auth-submit">Finish Sign Up</button>
             <a href="#" class="auth-link" onclick="switchAuthTab('signup'); return false;">Cancel</a>
@@ -6427,14 +6429,33 @@ body.dark-mode .wishlist-item {
         document.getElementById("authOwnerSkip").style.display = isBaseStep ? "inline-block" : "none";
 
         document.getElementById("authSubtitle").textContent = authSubtitles[tab] || "";
+
+        if (tab === "signup") toggleSignupStudentId();
+        if (tab === "signupGoogleName") toggleSignupGoogleStudentId();
     }
 
     function generateCode() {
         return String(Math.floor(100000 + Math.random() * 900000));
     }
 
+    function toggleSignupStudentId() {
+        var role = document.getElementById("signupRole").value;
+        var field = document.getElementById("signupStudentId");
+        field.style.display = (role === "Student") ? "block" : "none";
+        if (role !== "Student") field.value = "";
+    }
+
+    function toggleSignupGoogleStudentId() {
+        var role = document.getElementById("signupGoogleRole").value;
+        var field = document.getElementById("signupGoogleStudentId");
+        field.style.display = (role === "Student") ? "block" : "none";
+        if (role !== "Student") field.value = "";
+    }
+
     function openAuthModal() {
         authOverlay.classList.add("show");
+        toggleSignupStudentId();
+        toggleSignupGoogleStudentId();
     }
 
     function closeAuthModal(e) {
@@ -6450,6 +6471,7 @@ body.dark-mode .wishlist-item {
         var email = document.getElementById("signupEmail").value.trim().toLowerCase();
         var password = document.getElementById("signupPassword").value;
         var role = document.getElementById("signupRole").value;
+        var studentId = document.getElementById("signupStudentId").value.trim();
         var errorEl = document.getElementById("signupError");
 
         if (!isValidUsername(username)) {
@@ -6472,6 +6494,11 @@ body.dark-mode .wishlist-item {
             return false;
         }
 
+        if (role === "Student" && !studentId) {
+            errorEl.textContent = "Please enter your Student ID.";
+            return false;
+        }
+
         var users = getUsers();
 
         for (var i = 0; i < users.length; i++) {
@@ -6482,7 +6509,7 @@ body.dark-mode .wishlist-item {
         }
 
         errorEl.textContent = "";
-        sendSignupCode(name, username, email, password, role);
+        sendSignupCode(name, username, email, password, role, studentId);
 
         return false;
     }
@@ -6501,11 +6528,11 @@ body.dark-mode .wishlist-item {
         });
     }
 
-    function sendSignupCode(name, username, email, password, role) {
+    function sendSignupCode(name, username, email, password, role, studentId) {
         var code = generateCode();
 
         localStorage.setItem("athletica_pending_signup", JSON.stringify({
-            name: name, username: username, email: email, password: password, role: role, code: code
+            name: name, username: username, email: email, password: password, role: role, studentId: studentId || "", code: code
         }));
 
         document.getElementById("signupVerifyNote").innerHTML =
@@ -6585,7 +6612,7 @@ body.dark-mode .wishlist-item {
 
         updateUsers(function (users) {
             if (users.some(function (u) { return u.email === pending.email; })) return users;
-            users.push({ name: pending.name, username: pending.username, email: pending.email, password: pending.password, role: pending.role, avatar: "" });
+            users.push({ name: pending.name, username: pending.username, email: pending.email, password: pending.password, role: pending.role, studentId: pending.studentId || "", avatar: "" });
             return users;
         }, function () {
             setCurrentUser(pending.email);
@@ -6831,6 +6858,7 @@ body.dark-mode .wishlist-item {
         var name = document.getElementById("signupGoogleFullName").value.trim();
         var username = normalizeUsername(document.getElementById("signupGoogleUsername").value);
         var role = document.getElementById("signupGoogleRole").value;
+        var studentId = document.getElementById("signupGoogleStudentId").value.trim();
         var errorEl = document.getElementById("signupGoogleNameError");
         var pending = JSON.parse(localStorage.getItem("athletica_pending_google_signup") || "null");
 
@@ -6860,10 +6888,15 @@ body.dark-mode .wishlist-item {
             return false;
         }
 
+        if (role === "Student" && !studentId) {
+            errorEl.textContent = "Please enter your Student ID.";
+            return false;
+        }
+
         updateUsers(function (users) {
             var alreadyExists = users.some(function (u) { return u.email === pending.email; });
             if (!alreadyExists) {
-                users.push({ name: name, username: username, email: pending.email, password: "", role: role, avatar: pending.picture || "" });
+                users.push({ name: name, username: username, email: pending.email, password: "", role: role, studentId: studentId || "", avatar: pending.picture || "" });
             }
             return users;
         }, function () {
