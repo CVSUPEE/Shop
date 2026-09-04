@@ -37,6 +37,8 @@
 # ============================================================
 
 import os
+import random
+import re
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from google import genai
@@ -114,7 +116,14 @@ def product_chat():
         "bibilhin nila (at may available sizes ang produkto), gamitin",
         "ang tool na `select_size` para itala ito — sabay sagot ka pa",
         "rin sa text (sa wika ng customer) na kumpirmado na ang size",
-        "nila.",
+        "nila. HUWAG palaging parehong pangungusap ang gamitin sa",
+        "pagkumpirma ng size — mag-iba-iba ka ng phrasing tuwing may",
+        "size na na-confirm (hal. \"Noted, [size] it is!\", \"Great",
+        "choice — [size] confirmed!\", \"Naitala na ang size [size], sige",
+        "na!\", \"Ayan, [size] na ang laman ng order mo!\") — huwag",
+        "kopyahin nang eksakto ang mga halimbawang ito, gawan mo ng",
+        "sarili mong bersyon tuwing sasagot, basta natural at sa wikang",
+        "ginamit ng customer.",
         "Maikli at magiliw ang tono — parang totoong sales assistant,",
         "hindi robotic.",
     ])
@@ -165,9 +174,61 @@ def product_chat():
                 selected_size = (fc.args or {}).get("size")
 
     if not reply.strip():
-        reply = f"Naitala ko na ang size {selected_size}." if selected_size else "Paumanhin, maaari mo bang ulitin ang tanong?"
+        reply = _varied_size_confirmation(message, selected_size) if selected_size else \
+            _varied_no_reply(message)
 
     return jsonify({"reply": reply, "size": selected_size})
+
+
+# Simpleng paraan para malaman kung Tagalog/Taglish o English ang huling
+# mensahe ng customer — gagamitin lang bilang FALLBACK kapag walang
+# naibalik na text ang AI mismo (bihira lang mangyari ito).
+_TAGALOG_MARKERS = re.compile(
+    r"\b(ko|mo|ba|ang|ng|sa|po|opo|oo|hindi|salamat|paki|gusto|pwede|"
+    r"pwede po|magkano|meron|mayroon|kayo|kailan|paano|saan|yung|ito|"
+    r"yan|iyan|na lang|nalang|sige|ate|kuya)\b",
+    re.IGNORECASE,
+)
+
+
+def _is_tagalog(message):
+    return bool(_TAGALOG_MARKERS.search(message or ""))
+
+
+def _varied_size_confirmation(message, size):
+    if _is_tagalog(message):
+        templates = [
+            f"Naitala ko na — size {size} ang order mo!",
+            f"Ayan, size {size} na ang nakatala sa order mo.",
+            f"Sige, size {size} na po ang ilalagay ko sa order niyo.",
+            f"Confirmed na — size {size}!",
+            f"Okay, size {size} ang napili mo — nakatala na ito.",
+        ]
+    else:
+        templates = [
+            f"Got it — size {size} it is!",
+            f"Noted, I've saved size {size} for your order.",
+            f"Size {size} confirmed!",
+            f"Great choice — size {size} is now set for your order.",
+            f"All set — I've recorded size {size}.",
+        ]
+    return random.choice(templates)
+
+
+def _varied_no_reply(message):
+    if _is_tagalog(message):
+        templates = [
+            "Paumanhin, maaari mo bang ulitin ang tanong?",
+            "Sorry po, hindi ko gaanong nakuha — pwede mo bang i-rephrase?",
+            "Pasensya na, ulitin mo nga po ang tanong niyo?",
+        ]
+    else:
+        templates = [
+            "Sorry, can you rephrase that?",
+            "I didn't quite catch that — could you say it another way?",
+            "Apologies, could you ask that again?",
+        ]
+    return random.choice(templates)
 
 
 # ============================================================
