@@ -56,51 +56,51 @@ client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 # available na Gemini model ngayon (mas mataas kaysa gemini-3.6-flash).
 MODEL = "gemini-3.5-flash-lite"
 
-# Kailangan ng model na "sees" ang larawan (vision) para sa ID check.
-# Ang flash-lite ay multimodal din, pero kung mag-eeror ito sa images
-# sa iyong quota/region, pwede mong palitan ito ng "gemini-3.5-flash".
+# The model needs to "see" the image (vision) for the ID check.
+# flash-lite is multimodal too, but if it errors out on images due to
+# your quota/region, you can swap it for "gemini-3.5-flash".
 VISION_MODEL = "gemini-3.5-flash-lite"
 
-MAX_ID_IMAGE_BYTES = 6 * 1024 * 1024  # ~6MB pagkatapos i-decode
+MAX_ID_IMAGE_BYTES = 6 * 1024 * 1024  # ~6MB after decoding
 
-# Anong uri ng ID ang inaasahan/kailangan bawat role sa Sign Up, at
-# paano dapat suriin ng AI kung tugma ang ID sa role na iyon.
+# What type of ID is expected/required for each Sign Up role, and how
+# the AI should check whether the ID matches that role.
 ROLE_ID_REQUIREMENTS = {
     "Student": {
         "label": "Student ID",
         "match_instruction": (
-            "Base sa nakasulat/nakalimbag sa ID (hal. \"Student\", "
-            "pangalan ng paaralan, course/year level, student number, "
-            "atbp.), malinaw bang isa itong STUDENT ID (ID card na "
-            "inisyu ng isang paaralan/unibersidad/kolehiyo sa isang "
-            "mag-aaral)?"
+            "Based on what's printed/written on the ID (e.g. "
+            "\"Student\", school name, course/year level, student "
+            "number, etc.), does it clearly look like a STUDENT ID "
+            "(an ID card issued by a school/university/college to a "
+            "student)?"
         ),
     },
     "Teacher": {
         "label": "Teacher ID",
         "match_instruction": (
-            "Base sa nakasulat/nakalimbag sa ID (hal. \"Faculty\", "
-            "\"Teacher\", \"Employee\", department, employee number, "
-            "atbp.), malinaw bang isa itong TEACHER/FACULTY/EMPLOYEE ID "
-            "(ID card na inisyu ng isang paaralan sa isang guro/kawani, "
-            "HINDI student ID)?"
+            "Based on what's printed/written on the ID (e.g. "
+            "\"Faculty\", \"Teacher\", \"Employee\", department, "
+            "employee number, etc.), does it clearly look like a "
+            "TEACHER/FACULTY/EMPLOYEE ID (an ID card issued by a "
+            "school to a teacher/staff member, NOT a student ID)?"
         ),
     },
     "Parent": {
         "label": "National ID",
         "match_instruction": (
-            "Ito ay dapat isang GOVERNMENT-ISSUED NATIONAL ID (hal. "
-            "Philippine National ID/PhilSys ID, o national ID mula sa "
-            "ibang bansa) — HINDI school ID. Hindi mo dapat asahan na "
-            "may nakasulat na \"Parent\" sa mismong ID (wala talagang "
-            "ganitong national ID); ang tinitignan mo lang ay kung "
-            "ito ba ay isang totoong-mukhang national/government ID "
-            "card ng isang matanda (may national ID number, "
-            "issuing government authority, atbp.), hindi school ID o "
-            "ibang uri ng card."
+            "This should be a GOVERNMENT-ISSUED NATIONAL ID (e.g. "
+            "Philippine National ID/PhilSys ID, or a national ID from "
+            "another country) — NOT a school ID. Don't expect the "
+            "word \"Parent\" to appear on the ID itself (no national "
+            "ID actually says that); just check whether it looks like "
+            "a genuine national/government ID card for an adult (has "
+            "a national ID number, an issuing government authority, "
+            "etc.), not a school ID or some other type of card."
         ),
     },
 }
+
 
 
 # ============================================================
@@ -281,30 +281,27 @@ def _varied_no_reply(message):
 
 
 # ============================================================
-# /api/verify-id — AI check ng school/work ID + selfie sa Sign Up
+# /api/verify-id — AI check for school/work ID + selfie at Sign Up
 # ============================================================
 #
-# IMPORTANTE — mangyaring basahin bago i-deploy:
+# IMPORTANT — please read before deploying:
 #
-# Ito ay isang HEURISTIC / "best-effort" na check lamang gamit ang
-# Gemini vision. HINDI ito totoong government-grade o school-grade
-# identity verification (walang totoong liveness detection dito —
-# selfie photo lang ito, hindi video, kaya kaya pa rin itong linlangin
-# ng determinadong tao gamit ang huwad na ID + huwad/AI-generated na
-# "selfie"). Ang pagsama ng selfie-holding-ID ay malaking hadlang na
-# sa mga basta kumuha lang ng litrato ng ID ng ibang tao mula sa
-# internet/social media, pero HINDI ito kapalit ng tunay na KYC
-# (hal. Sumsub/Onfido/Persona) kung kailangan mo ng mataas na
-# seguridad.
+# This is only a HEURISTIC / "best-effort" check using Gemini vision.
+# It is NOT true government-grade or school-grade identity
+# verification (there's no real liveness detection here — it's a
+# selfie photo, not video, so a determined person could still fool it
+# with a fake ID + a fake/AI-generated "selfie"). Requiring a
+# selfie-holding-ID raises the bar significantly against someone who
+# just grabs a photo of someone else's ID from the internet/social
+# media, but it is NOT a substitute for real KYC (e.g. Sumsub, Onfido,
+# Persona) if you need high-assurance verification.
 #
-# Privacy note: ang mga larawan (ID + selfie) ay ipinapadala lamang
-# papunta sa Gemini para sa isang beses na pagsusuri — HINDI ito
-# ise-save sa disk o database dito sa endpoint na ito. Kung
-# kakailanganin mo ng audit trail sa hinaharap, kakailanganin mo
-# dagdagan ito ng sarili mong secure storage — huwag basta mag-imbak
-# ng ID/selfie photos nang walang encryption at malinaw na retention
-# policy, dahil sensitive personal data ito (kasama na ang mukha ng
-# tao).
+# Privacy note: the images (ID + selfie) are sent only to Gemini for
+# a one-time check — this endpoint does NOT save them to disk or a
+# database. If you need an audit trail in the future, you'll need to
+# add your own secure storage — don't just store ID/selfie photos
+# without encryption and a clear retention policy, since this is
+# sensitive personal data (including someone's face).
 @app.route("/api/verify-id", methods=["POST"])
 def verify_id():
     data = request.get_json(silent=True) or {}
@@ -329,52 +326,51 @@ def verify_id():
     id_req = ROLE_ID_REQUIREMENTS[role]
 
     prompt = "\n".join([
-        "May dalawang larawan na ipinasa ng isang taong nagpa-sign-up",
-        "bilang \"" + role + "\" sa isang online shop para sa school",
-        "supplies/apparel. Ang inaasahang uri ng ID para sa role na ito",
-        "ay: " + id_req["label"] + ".",
-        "  Larawan 1: litrato ng kanilang " + id_req["label"] + ".",
-        "  Larawan 2: isang selfie kung saan hawak nila ang PAREHONG",
-        "             ID card sa tabi/malapit sa kanilang mukha.",
-        "Ang pangalang isinulat nila sa form ay: \"" +
-        (name or "(walang ibinigay)") + "\".",
+        "Two images were submitted by someone signing up as a",
+        "\"" + role + "\" on an online shop for school supplies/apparel.",
+        "The expected type of ID for this role is: " + id_req["label"] + ".",
+        "  Image 1: a photo of their " + id_req["label"] + ".",
+        "  Image 2: a selfie in which they are holding the SAME ID",
+        "           card next to/close to their face.",
+        "The name they typed on the form is: \"" +
+        (name or "(none given)") + "\".",
         "",
-        "Suriin mo ang DALAWANG larawan nang magkasama:",
-        "1. May makikitang totoong ID card ba sa Larawan 1 (hindi",
-        "   random na bagay, hindi blangkong screen, hindi halatang",
-        "   litrato ng litrato mula sa ibang screen)?",
+        "Evaluate BOTH images together:",
+        "1. Is there a genuine-looking ID card visible in Image 1 (not",
+        "   a random object, not a blank screen, not an obvious photo",
+        "   of a photo from another screen)?",
         "2. " + id_req["match_instruction"],
-        "3. Sa Larawan 2, may makikita bang tao na hawak ang isang ID",
-        "   card sa tabi ng kanyang mukha, at MUKHANG PAREHONG ID ito",
-        "   sa nasa Larawan 1 (parehong kulay/disenyo/laman, hindi",
-        "   ibang card)?",
-        "4. Kung may litrato ng may-ari sa mismong ID card, tugma ba",
-        "   ito o katulad ng mukha ng taong humahawak nito sa",
-        "   Larawan 2?",
-        "5. Kung may nakikitang pangalan sa ID, malapit ba ito o tugma",
-        "   sa pangalang \"" + (name or "(wala)") + "\"? (Huwag masyadong",
-        "   mahigpit — pwedeng magkaiba ng ayos/spelling nang bahagya.)",
-        "6. May halatang palatandaan ba ng pandaraya sa alinman sa",
-        "   dalawang larawan (obvious digital editing, mismatched",
-        "   fonts, halatang photoshopped na text, larawan ng screen na",
-        "   may mga artifact, o Larawan 2 na mukhang litrato lang ng",
-        "   isa pang litrato sa halip na live na selfie)?",
+        "3. In Image 2, is there a person visibly holding an ID card",
+        "   next to their face, and does it LOOK LIKE THE SAME ID as",
+        "   in Image 1 (same color/design/content, not a different",
+        "   card)?",
+        "4. If there's a photo of the ID holder on the card itself,",
+        "   does it match or resemble the face of the person holding",
+        "   it in Image 2?",
+        "5. If a name is visible on the ID, is it close to or a match",
+        "   for the name \"" + (name or "(none)") + "\"? (Don't be too",
+        "   strict — minor formatting/spelling differences are fine.)",
+        "6. Is there any obvious sign of tampering in either image",
+        "   (obvious digital editing, mismatched fonts, clearly",
+        "   photoshopped text, a photo of a screen with visible",
+        "   artifacts, or Image 2 looking like a photo of another",
+        "   photo rather than a live selfie)?",
         "",
-        "Sumagot ka LAMANG ng isang JSON object, walang ibang teksto,",
-        "walang markdown code fence, sa eksaktong ganitong format:",
-        '{"valid": true or false, "reason": "isang maikling pangungusap '
-        'kung bakit, sa Taglish, na ipapakita sa user"}',
+        "Respond ONLY with a single JSON object, no other text, no",
+        "markdown code fence, in exactly this format:",
+        '{"valid": true or false, "reason": "one short sentence '
+        'explaining why, to be shown to the user"}',
         "",
-        "Ilagay na \"valid\": false kung: hindi malinaw na ID card ang",
-        "nasa Larawan 1; hindi ito " + id_req["label"] + " (o hindi",
-        "sapat na katulad nito); walang makikitang taong hawak ang ID",
-        "sa Larawan 2 o iba ang ID na hawak; halatang hindi tugma ang",
-        "mukha sa ID sa taong humahawak nito; o may malinaw na",
-        "palatandaan ng pandaraya. Kung medyo malabo lang ang mga",
-        "larawan pero may sapat namang batayan na tama ang uri ng ID",
-        "at pareho ang hawak na ID sa dalawang larawan, \"valid\": true",
-        "pa rin — huwag masyadong mahigpit sa larawang malabo/may",
-        "glare, basta't makatwiran.",
+        "Set \"valid\": false if: there's no clear ID card in Image 1;",
+        "it isn't a " + id_req["label"] + " (or not close enough to",
+        "one); there's no visible person holding an ID in Image 2 or a",
+        "different ID is being held; the face on the ID clearly doesn't",
+        "match the person holding it; or there's a clear sign of",
+        "tampering. If the images are only somewhat unclear but there's",
+        "enough evidence that the ID type is correct and the same ID is",
+        "held in both images, still return \"valid\": true — don't be",
+        "overly strict about blurry photos or glare, just use",
+        "reasonable judgment.",
     ])
 
     try:
@@ -396,12 +392,12 @@ def verify_id():
         )
     except Exception as e:
         print("verify-id error:", e)
-        # Fail CLOSED (i.e. huwag i-approve) kapag nag-error ang AI check,
-        # dahil ito ang gate bago malikha ang account.
+        # Fail CLOSED (i.e. don't approve) when the AI check itself
+        # errors out, since this is the gate before an account is created.
         return jsonify({
             "valid": False,
-            "reason": "Hindi namin na-verify ang ID ngayon dahil sa technical error. "
-                      "Pakisubukan ulit, o makipag-ugnayan sa Contact Support.",
+            "reason": "We couldn't verify your ID right now due to a technical error. "
+                      "Please try again, or contact Support.",
         }), 200
 
     raw_text = ""
@@ -415,8 +411,8 @@ def verify_id():
     if result is None:
         return jsonify({
             "valid": False,
-            "reason": "Hindi malinaw ang resulta ng pag-verify. Pakisubukan ulit "
-                      "gamit ang mas malinaw na mga larawan.",
+            "reason": "We couldn't make sense of the verification result. Please try "
+                      "again with clearer photos.",
         }), 200
 
     return jsonify({
@@ -426,9 +422,9 @@ def verify_id():
 
 
 def _decode_image(image_b64, mime_type):
-    """Kunin at i-decode ang isang base64/data-URL na larawan.
-    Nagbabalik ng (bytes, mime_type, error_message). Kapag may
-    error_message, walang laman ang bytes/mime_type."""
+    """Fetch and decode a base64/data-URL image.
+    Returns (bytes, mime_type, error_message). When error_message is
+    set, bytes/mime_type are empty."""
     image_b64 = image_b64 or ""
     mime_type = (mime_type or "image/jpeg").strip()
 
@@ -454,8 +450,8 @@ def _decode_image(image_b64, mime_type):
 
 
 def _parse_verify_json(raw_text):
-    """Subukang i-parse ang JSON na sinagot ng model, kahit may
-    nakapaligid pang whitespace/code fence na naisama."""
+    """Try to parse the JSON the model replied with, even if it's
+    wrapped in extra whitespace/a code fence."""
     text = (raw_text or "").strip()
     if text.startswith("```"):
         text = text.strip("`")
