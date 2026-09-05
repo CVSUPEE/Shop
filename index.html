@@ -6816,7 +6816,8 @@ body.dark-mode .wishlist-item {
         products: {},
         promocodes: [],
         dms: {},
-        ready: { users: false, orders: false, reviews: false, comments: false, products: false, promocodes: false, dms: false }
+        bannedAccounts: [],
+        ready: { users: false, orders: false, reviews: false, comments: false, products: false, promocodes: false, dms: false, bannedAccounts: false }
     };
     var _ownerSeeded = false;
 
@@ -6857,6 +6858,21 @@ body.dark-mode .wishlist-item {
         seedOwnerAccountIfNeeded();
         _onCloudChange("users");
     }, function (err) { console.error("users sync error", err); });
+
+    db.collection("athletica").doc("bannedAccounts").onSnapshot(function (doc) {
+        _cloud.bannedAccounts = (doc.exists && doc.data().list) ? doc.data().list : [];
+        _cloud.ready.bannedAccounts = true;
+    }, function (err) { console.error("bannedAccounts sync error", err); });
+
+    function getBannedRecord(email) {
+        email = (email || "").trim().toLowerCase();
+        if (!email) return null;
+        var list = _cloud.bannedAccounts || [];
+        for (var i = 0; i < list.length; i++) {
+            if ((list[i].email || "").toLowerCase() === email) return list[i];
+        }
+        return null;
+    }
 
     db.collection("athletica").doc("products").onSnapshot(function (doc) {
         _cloud.products = (doc.exists && doc.data().map) ? doc.data().map : {};
@@ -7061,6 +7077,7 @@ body.dark-mode .wishlist-item {
     function getCurrentUser() {
         var email = localStorage.getItem("athletica_current_user");
         if (!email) return null;
+        if (getBannedRecord(email)) return null;
         var users = getUsers();
         for (var i = 0; i < users.length; i++) {
             if (users[i].email === email) return users[i];
@@ -7443,6 +7460,12 @@ body.dark-mode .wishlist-item {
         closeIdScanner();
     }
 
+    function suspensionMessage(record) {
+        var reason = (record && record.reason) ? record.reason.trim() : "";
+        return "Your account has been suspended, because you violated the verification requirement." +
+            (reason ? " Reason: " + reason : "");
+    }
+
     function handleSignUp(e) {
         e.preventDefault();
 
@@ -7454,6 +7477,12 @@ body.dark-mode .wishlist-item {
         var studentId = document.getElementById("signupStudentId").value.trim();
         var errorEl = document.getElementById("signupError");
         var submitBtn = document.getElementById("signupSubmitBtn");
+
+        var bannedRecord = getBannedRecord(email);
+        if (bannedRecord) {
+            errorEl.textContent = suspensionMessage(bannedRecord);
+            return false;
+        }
 
         if (!isValidUsername(username)) {
             errorEl.textContent = "Username must start with @ and be 3-20 letters, numbers, or underscores (e.g. @CVSPEE2026).";
@@ -7768,6 +7797,12 @@ body.dark-mode .wishlist-item {
         var password = document.getElementById("signinPassword").value;
         var errorEl = document.getElementById("signinError");
 
+        var bannedRecord = getBannedRecord(input);
+        if (bannedRecord) {
+            errorEl.textContent = suspensionMessage(bannedRecord);
+            return false;
+        }
+
         var users = getUsers();
         var found = null;
         var strippedInput = input.charAt(0) === "@" ? input : "@" + input;
@@ -7958,10 +7993,23 @@ body.dark-mode .wishlist-item {
                 return;
             }
 
+            var wasBanned = storedEmail ? getBannedRecord(storedEmail) : null;
+
             if (storedEmail) localStorage.removeItem("athletica_current_user");
 
             updateCartBadge();
             updateWishlistBadge();
+
+            if (wasBanned) {
+                container.innerHTML =
+                    '<div class="account-box">' +
+                        '<h3>Account Suspended</h3>' +
+                        '<p>' + escapeHtml(suspensionMessage(wasBanned)) + '</p>' +
+                        '<a href="#" class="btn" onclick="openAuthModal(); return false;">Sign In / Sign Up</a>' +
+                    '</div>';
+                refreshOrderUI();
+                return;
+            }
 
             container.innerHTML =
                 '<div class="account-box">' +
