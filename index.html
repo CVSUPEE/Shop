@@ -1617,6 +1617,11 @@ body.dark-mode .page-transition-overlay {
     border-radius: 10px;
     overflow: hidden;
     margin-bottom: 12px;
+    transition: aspect-ratio 0.2s ease;
+}
+
+.id-scan-frame-wrap.portrait-mode {
+    aspect-ratio: 3 / 4;
 }
 
 .id-scan-frame-wrap video,
@@ -1632,11 +1637,48 @@ body.dark-mode .page-transition-overlay {
     border: 2px dashed rgba(255, 255, 255, 0.85);
     border-radius: 8px;
     pointer-events: none;
+    transition: border-color 0.2s ease, inset 0.2s ease;
+}
+
+.id-scan-guide.id-scan-guide-portrait {
+    inset: 6% 26%;
 }
 
 .id-scan-guide.id-scan-guide-face {
     inset: 8% 22%;
     border-radius: 50%;
+}
+
+.id-scan-guide.id-scan-guide-good {
+    border-color: #2ecc71;
+    border-style: solid;
+}
+
+.id-scan-orientation {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.id-scan-orient-btn {
+    flex: 1;
+    max-width: 150px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #fff;
+    color: #555;
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.id-scan-orient-btn.active {
+    border-color: #145A32;
+    background: #eafaf0;
+    color: #145A32;
+    font-weight: 600;
 }
 
 .id-scan-actions {
@@ -1647,6 +1689,18 @@ body.dark-mode .page-transition-overlay {
 
 .id-scan-actions .btn {
     flex: 1;
+}
+
+body.dark-mode .id-scan-orient-btn {
+    background: #262626;
+    border-color: #444;
+    color: #ccc;
+}
+
+body.dark-mode .id-scan-orient-btn.active {
+    border-color: #66bb6a;
+    background: #16261c;
+    color: #a5d6a7;
 }
 
 body.dark-mode .id-scan-box {
@@ -1809,6 +1863,41 @@ body.dark-mode .auth-link-btn {
     border-radius: 20px;
     padding: 3px 14px;
     margin: -12px auto 20px;
+}
+
+.verify-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 20px;
+    padding: 3px 12px;
+    margin: -14px auto 20px;
+}
+
+.verify-badge-yes {
+    color: #1e8449;
+    background: #eafaf0;
+    border: 1px solid #1e8449;
+}
+
+.verify-badge-no {
+    color: #c0392b;
+    background: #fdecea;
+    border: 1px solid #c0392b;
+}
+
+body.dark-mode .verify-badge-yes {
+    color: #a5d6a7;
+    background: #16261c;
+    border-color: #66bb6a;
+}
+
+body.dark-mode .verify-badge-no {
+    color: #ffab91;
+    background: #2a1712;
+    border-color: #e57373;
 }
 
 .profile-actions {
@@ -5005,7 +5094,7 @@ body.dark-mode .wishlist-item {
 
             <label class="auth-id-upload-label" id="signupIdUploadLabel">Student/Teacher ID or National ID + Selfie</label>
             <button type="button" class="btn auth-scan-btn" id="signupScanBtn" onclick="startIdScanFlow()">📷 Scan ID &amp; Selfie</button>
-            <p class="auth-id-upload-note" id="signupIdUploadNote">Piliin muna ang role sa itaas — Student ID, Teacher ID, o National ID (para sa Parent) ang isscan mo, tapos selfie na hawak ito.</p>
+            <p class="auth-id-upload-note" id="signupIdUploadNote">Select your role above first — you'll scan your Student ID, Teacher ID, or National ID (for Parent), then take a selfie holding it.</p>
             <div class="auth-id-preview-row">
                 <img id="signupIdPreview" class="auth-id-preview" style="display:none;" alt="Scanned ID preview">
                 <img id="signupSelfiePreview" class="auth-id-preview" style="display:none;" alt="Selfie with ID preview">
@@ -5061,9 +5150,14 @@ body.dark-mode .wishlist-item {
     <div class="id-scan-box">
         <button type="button" class="modal-close" onclick="closeIdScanner()">&times;</button>
         <p class="id-scan-title" id="idScanTitle">Scan your school/faculty ID</p>
-        <p class="id-scan-hint" id="idScanHint">I-align ang ID sa loob ng frame, siguraduhing malinaw at walang glare.</p>
+        <p class="id-scan-hint" id="idScanHint">Align your ID within the frame, and make sure it's clear with no glare.</p>
 
-        <div class="id-scan-frame-wrap">
+        <div class="id-scan-orientation" id="idScanOrientationToggle">
+            <button type="button" class="id-scan-orient-btn active" id="idScanOrientLandscapeBtn" onclick="setIdScanOrientation('landscape')">▭ Horizontal</button>
+            <button type="button" class="id-scan-orient-btn" id="idScanOrientPortraitBtn" onclick="setIdScanOrientation('portrait')">▯ Vertical</button>
+        </div>
+
+        <div class="id-scan-frame-wrap" id="idScanFrameWrap">
             <video id="idScanVideo" autoplay playsinline muted></video>
             <canvas id="idScanCanvas" style="display:none;"></canvas>
             <img id="idScanSnapshot" style="display:none;" alt="Captured photo">
@@ -5073,7 +5167,7 @@ body.dark-mode .wishlist-item {
         <p class="auth-error" id="idScanError"></p>
 
         <div class="id-scan-actions" id="idScanLiveActions">
-            <button type="button" class="btn auth-submit" onclick="captureIdPhoto()">Capture</button>
+            <button type="button" class="btn auth-submit" onclick="captureIdPhoto()">Capture Now</button>
         </div>
         <div class="id-scan-actions" id="idScanReviewActions" style="display:none;">
             <button type="button" class="btn auth-link-btn" onclick="retakeIdPhoto()">Retake</button>
@@ -7036,10 +7130,10 @@ body.dark-mode .wishlist-item {
         var uploadNote = document.getElementById("signupIdUploadNote");
         if (idLabel) {
             uploadLabel.textContent = idLabel + " + Selfie";
-            uploadNote.textContent = "I-sscan ang iyong " + idLabel + ", tapos kukunan ka ng selfie na hawak ito sa tabi ng mukha mo — AI mismo ang mag-veverify.";
+            uploadNote.textContent = "Scan your " + idLabel + ", then take a selfie holding it next to your face — our AI will verify it automatically.";
         } else {
             uploadLabel.textContent = "Student/Teacher ID or National ID + Selfie";
-            uploadNote.textContent = "Piliin muna ang role sa itaas — Student ID, Teacher ID, o National ID (para sa Parent) ang isscan mo, tapos selfie na hawak ito.";
+            uploadNote.textContent = "Select your role above first — you'll scan your Student ID, Teacher ID, or National ID (for Parent), then take a selfie holding it.";
         }
     }
 
@@ -7056,6 +7150,7 @@ body.dark-mode .wishlist-item {
 
     function resetIdScanState() {
         idScanMode = "id";
+        idScanOrientation = "landscape";
         signupCapturedIdImage = null;
         signupCapturedSelfieImage = null;
         idScanPendingDataUrl = null;
@@ -7070,9 +7165,20 @@ body.dark-mode .wishlist-item {
     var VERIFY_ID_ENDPOINT = "https://shop-production-bc79.up.railway.app/api/verify-id";
 
     var idScanStream = null;
-    var idScanMode = "id"; // "id" -> scan ng ID card; "selfie" -> selfie na hawak ang ID
-    var signupCapturedIdImage = null;     // data URL ng na-confirm na ID scan
-    var signupCapturedSelfieImage = null; // data URL ng na-confirm na selfie+ID
+    var idScanMode = "id"; // "id" -> scanning the ID card; "selfie" -> selfie holding the ID
+    var idScanOrientation = "landscape"; // "landscape" or "portrait" — only applies to the "id" step
+    var signupCapturedIdImage = null;     // data URL of the confirmed ID scan
+    var signupCapturedSelfieImage = null; // data URL of the confirmed selfie+ID
+
+    function setIdScanOrientation(orientation) {
+        idScanOrientation = orientation;
+        document.getElementById("idScanOrientLandscapeBtn").classList.toggle("active", orientation === "landscape");
+        document.getElementById("idScanOrientPortraitBtn").classList.toggle("active", orientation === "portrait");
+        document.getElementById("idScanFrameWrap").classList.toggle("portrait-mode", orientation === "portrait");
+        document.getElementById("idScanGuide").classList.toggle("id-scan-guide-portrait", orientation === "portrait");
+        // Changing orientation resets the "hold steady" progress.
+        idScanStableCount = 0;
+    }
 
     function startIdScanFlow() {
         var role = document.getElementById("signupRole").value;
@@ -7081,8 +7187,8 @@ body.dark-mode .wishlist-item {
             return;
         }
 
-        // Laging magsimula sa "id" step para hindi mapagsamang mismatched
-        // ang ID at selfie mula sa magkaibang pagkakataon.
+        // Always start over from the "id" step so we never pair a
+        // mismatched ID and selfie from different attempts.
         signupCapturedIdImage = null;
         signupCapturedSelfieImage = null;
         document.getElementById("signupIdPreview").style.display = "none";
@@ -7098,6 +7204,8 @@ body.dark-mode .wishlist-item {
         var guide = document.getElementById("idScanGuide");
         var title = document.getElementById("idScanTitle");
         var hint = document.getElementById("idScanHint");
+        var frameWrap = document.getElementById("idScanFrameWrap");
+        var orientToggle = document.getElementById("idScanOrientationToggle");
         var isSelfieStep = (idScanMode === "selfie");
 
         errorEl.textContent = "";
@@ -7106,17 +7214,22 @@ body.dark-mode .wishlist-item {
         document.getElementById("idScanLiveActions").style.display = "flex";
         document.getElementById("idScanReviewActions").style.display = "none";
 
+        orientToggle.style.display = isSelfieStep ? "none" : "flex";
+        frameWrap.classList.toggle("portrait-mode", !isSelfieStep && idScanOrientation === "portrait");
         guide.classList.toggle("id-scan-guide-face", isSelfieStep);
+        guide.classList.toggle("id-scan-guide-portrait", !isSelfieStep && idScanOrientation === "portrait");
+        guide.classList.remove("id-scan-guide-good");
+
         var idLabel = ROLE_ID_LABELS[document.getElementById("signupRole").value] || "ID";
         title.textContent = isSelfieStep ? ("Selfie with your " + idLabel) : ("Scan your " + idLabel);
         hint.textContent = isSelfieStep ?
-            "Hawak ang parehong " + idLabel + " sa tabi ng mukha mo, siguraduhing pareho itong malinaw." :
-            "I-align ang " + idLabel + " sa loob ng frame, siguraduhing malinaw at walang glare.";
+            "Hold the same " + idLabel + " next to your face, and make sure both are clearly visible." :
+            "Align your " + idLabel + " within the frame, and make sure it's clear with no glare.";
 
         overlay.classList.add("show");
 
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            errorEl.textContent = "Hindi supported ng browser mo ang camera scan. Subukan sa ibang browser (Chrome/Safari) o device.";
+            errorEl.textContent = "Your browser doesn't support camera scanning. Please try a different browser (Chrome/Safari) or device.";
             return;
         }
 
@@ -7130,13 +7243,128 @@ body.dark-mode .wishlist-item {
         }).then(function (stream) {
             idScanStream = stream;
             video.srcObject = stream;
+            startAutoCaptureLoop();
         }).catch(function (err) {
             console.error("camera error:", err);
-            errorEl.textContent = "Hindi ma-access ang camera. Payagan ang camera permission at subukan ulit.";
+            errorEl.textContent = "Couldn't access the camera. Please allow camera permission and try again.";
         });
     }
 
+    // ------------------------------------------------------------
+    // Lightweight "hold steady" auto-capture.
+    //
+    // This does NOT do real rectangle/edge detection of the ID card —
+    // that would need a heavier library (e.g. OpenCV.js) or an ML
+    // model. Instead it checks, on the whole video frame, a few cheap
+    // signals every ~250ms: is it bright enough (not too dark/too much
+    // glare), is it reasonably sharp (not blurry/still moving into
+    // place), and is it stable frame-to-frame (not currently moving).
+    // When all three hold for about a second, it auto-triggers the
+    // same capture the "Capture Now" button uses. The on-screen guide
+    // frame is what actually gets the ID positioned correctly; this
+    // loop just decides *when* the shot looks good enough to take.
+    // ------------------------------------------------------------
+    var idScanAutoTimer = null;
+    var idScanAutoCanvas = document.createElement("canvas");
+    var idScanPrevGray = null;
+    var idScanStableCount = 0;
+
+    function startAutoCaptureLoop() {
+        stopAutoCaptureLoop();
+        idScanPrevGray = null;
+        idScanStableCount = 0;
+        idScanAutoTimer = setInterval(analyzeFrameForAutoCapture, 250);
+    }
+
+    function stopAutoCaptureLoop() {
+        if (idScanAutoTimer) {
+            clearInterval(idScanAutoTimer);
+            idScanAutoTimer = null;
+        }
+    }
+
+    function analyzeFrameForAutoCapture() {
+        var video = document.getElementById("idScanVideo");
+        if (!video.videoWidth) return;
+
+        var w = 96, h = 72;
+        idScanAutoCanvas.width = w;
+        idScanAutoCanvas.height = h;
+        var ctx = idScanAutoCanvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, w, h);
+
+        var frame;
+        try {
+            frame = ctx.getImageData(0, 0, w, h).data;
+        } catch (e) {
+            return; // e.g. tainted canvas — just skip this tick
+        }
+
+        var gray = new Float32Array(w * h);
+        var sum = 0;
+        for (var i = 0, p = 0; i < frame.length; i += 4, p++) {
+            var g = frame[i] * 0.299 + frame[i + 1] * 0.587 + frame[i + 2] * 0.114;
+            gray[p] = g;
+            sum += g;
+        }
+        var brightness = sum / (w * h);
+
+        var edgeSum = 0;
+        for (var y = 0; y < h; y++) {
+            for (var x = 1; x < w; x++) {
+                edgeSum += Math.abs(gray[y * w + x] - gray[y * w + x - 1]);
+            }
+        }
+        var sharpness = edgeSum / (w * h);
+
+        var motion = 999;
+        if (idScanPrevGray) {
+            var diffSum = 0;
+            for (var k = 0; k < gray.length; k++) diffSum += Math.abs(gray[k] - idScanPrevGray[k]);
+            motion = diffSum / gray.length;
+        }
+        idScanPrevGray = gray;
+
+        var hint = document.getElementById("idScanHint");
+        var guide = document.getElementById("idScanGuide");
+
+        var brightnessOk = brightness > 40 && brightness < 235;
+        var sharpOk = sharpness > 5;
+        var stableOk = motion < 4;
+
+        if (!brightnessOk) {
+            idScanStableCount = 0;
+            guide.classList.remove("id-scan-guide-good");
+            hint.textContent = (brightness <= 40) ?
+                "Too dark — move somewhere brighter." :
+                "Too bright / glare — tilt it to reduce glare.";
+            return;
+        }
+        if (!sharpOk) {
+            idScanStableCount = 0;
+            guide.classList.remove("id-scan-guide-good");
+            hint.textContent = "Hold it a bit closer and steady so it's in focus.";
+            return;
+        }
+        if (!stableOk) {
+            idScanStableCount = 0;
+            guide.classList.remove("id-scan-guide-good");
+            hint.textContent = "Hold steady...";
+            return;
+        }
+
+        idScanStableCount++;
+        guide.classList.add("id-scan-guide-good");
+        hint.textContent = "Looks good — capturing...";
+
+        if (idScanStableCount >= 4) { // ~1 second of steady, clear frames
+            stopAutoCaptureLoop();
+            captureIdPhoto();
+        }
+    }
+
     function stopIdScanStream() {
+        stopAutoCaptureLoop();
         if (idScanStream) {
             idScanStream.getTracks().forEach(function (t) { t.stop(); });
             idScanStream = null;
@@ -7149,13 +7377,15 @@ body.dark-mode .wishlist-item {
     }
 
     function captureIdPhoto() {
+        stopAutoCaptureLoop();
+
         var video = document.getElementById("idScanVideo");
         var canvas = document.getElementById("idScanCanvas");
         var snapshot = document.getElementById("idScanSnapshot");
         var errorEl = document.getElementById("idScanError");
 
         if (!video.videoWidth) {
-            errorEl.textContent = "Hindi pa ready ang camera, sandali lang at subukan ulit.";
+            errorEl.textContent = "Camera isn't ready yet — please wait a moment and try again.";
             return;
         }
 
@@ -7195,7 +7425,7 @@ body.dark-mode .wishlist-item {
             idPreview.src = signupCapturedIdImage;
             idPreview.style.display = "block";
 
-            // Deretso sa susunod na step — selfie habang hawak ang ID.
+            // Move straight on to the next step — selfie holding the ID.
             idScanMode = "selfie";
             openIdScanner();
             return;
@@ -7322,7 +7552,7 @@ body.dark-mode .wishlist-item {
         var code = generateCode();
 
         localStorage.setItem("athletica_pending_signup", JSON.stringify({
-            name: name, username: username, email: email, password: password, role: role, studentId: studentId || "", code: code
+            name: name, username: username, email: email, password: password, role: role, studentId: studentId || "", idVerified: true, code: code
         }));
 
         document.getElementById("signupVerifyNote").innerHTML =
@@ -7402,7 +7632,7 @@ body.dark-mode .wishlist-item {
 
         updateUsers(function (users) {
             if (users.some(function (u) { return u.email === pending.email; })) return users;
-            users.push({ name: pending.name, username: pending.username, email: pending.email, password: pending.password, role: pending.role, studentId: pending.studentId || "", avatar: "" });
+            users.push({ name: pending.name, username: pending.username, email: pending.email, password: pending.password, role: pending.role, studentId: pending.studentId || "", idVerified: pending.idVerified === true, avatar: "" });
             return users;
         }, function () {
             setCurrentUser(pending.email);
@@ -7775,6 +8005,9 @@ body.dark-mode .wishlist-item {
                 (user.username ? '<p class="profile-username">' + escapeHtml(user.username) + '</p>' : '') +
                 '<p class="profile-email">' + user.email + '</p>' +
                 (user.role ? '<p class="profile-role">' + escapeHtml(user.role) + '</p>' : '') +
+                (user.role ? (user.idVerified
+                    ? '<p class="verify-badge verify-badge-yes" title="ID verified at sign up"><i class="fa-solid fa-circle-check"></i> Verified</p>'
+                    : '<p class="verify-badge verify-badge-no" title="ID not verified"><i class="fa-solid fa-circle-xmark"></i> Not Verified</p>') : '') +
                 (user.isOwner ? '<p class="profile-email">Signed in as site owner</p>' : '') +
                 (!user.isOwner && user.isSeller ? '<p class="profile-email">Seller account</p>' : '') +
                 '<button type="button" class="profile-logout-btn" onclick="logout()">Log Out</button>' +
