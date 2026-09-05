@@ -780,6 +780,10 @@ body.dark-mode a {
     color: #ddd;
 }
 
+body.dark-mode .new-product-filter {
+    color: #ccc;
+}
+
 body.dark-mode h1,
 body.dark-mode h2,
 body.dark-mode h3 {
@@ -867,6 +871,10 @@ body.dark-mode .order-tracking-tabs {
 }
 
 body.dark-mode .order-row {
+    border-color: #2a2a2a;
+}
+
+body.dark-mode .order-history-item-row {
     border-color: #2a2a2a;
 }
 
@@ -1044,6 +1052,14 @@ body.dark-mode .modal-box .user-profile-view-avatar {
 
 body.dark-mode .order-row-top strong {
     color: #f0f0f0;
+}
+
+body.dark-mode .order-history-item-info {
+    color: #f0f0f0;
+}
+
+body.dark-mode .order-history-item-info .order-history-item-meta {
+    color: #999;
 }
 
 body.dark-mode .review-order-total strong {
@@ -2333,6 +2349,28 @@ body.dark-mode .confirm-overlay {
     justify-content: space-between;
     align-items: center;
     gap: 8px;
+}
+
+.order-history-item-row {
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+}
+
+.order-history-item-info {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.5;
+}
+
+.order-history-item-info .order-history-item-name {
+    font-weight: bold;
+}
+
+.order-history-item-info .order-history-item-meta {
+    font-size: 13px;
+    color: #777;
 }
 
 .orders-panel-header {
@@ -4136,6 +4174,42 @@ body.dark-mode .wishlist-item {
     background: #0d3d22;
 }
 
+.new-product-filter {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: #555;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.new-product-filter input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    accent-color: #145A32;
+    cursor: pointer;
+}
+
+@media only screen and (max-width: 600px) {
+    .new-product-filter {
+        font-size: 10.5px;
+        gap: 5px;
+    }
+
+    .new-product-filter input[type="checkbox"] {
+        width: 14px;
+        height: 14px;
+    }
+}
+
 @media only screen and (max-width: 600px) {
     .add-product-btn {
         padding: 5px 14px;
@@ -4285,6 +4359,50 @@ body.dark-mode .wishlist-item {
 
 .product-edit-btn:hover {
     background: #145A32;
+}
+
+.product-image-wrap {
+    position: relative;
+    overflow: hidden;
+}
+
+.product-new-ribbon {
+    position: absolute;
+    top: 14px;
+    right: -36px;
+    width: 130px;
+    padding: 4px 0;
+    background: #d81f26;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    transform: rotate(45deg);
+    transform-origin: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    z-index: 6;
+    pointer-events: none;
+    animation: newRibbonPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes newRibbonPulse {
+    0%, 100% {
+        transform: rotate(45deg) scale(1);
+    }
+    25% {
+        transform: rotate(45deg) scale(1.12);
+    }
+    40% {
+        transform: rotate(45deg) scale(1);
+    }
+    55% {
+        transform: rotate(45deg) scale(1.08);
+    }
+    70% {
+        transform: rotate(45deg) scale(1);
+    }
 }
 
 .add-product-box {
@@ -5631,6 +5749,10 @@ body.dark-mode .wishlist-item {
     </div>
 
     <div class="product-section-head">
+        <label class="new-product-filter" id="newProductFilterLabel">
+            <input type="checkbox" id="newProductFilterCheckbox" onchange="handleNewProductFilterChange()">
+            New Product
+        </label>
         <h2 class="title">
             Featured Product
         </h2>
@@ -7373,6 +7495,12 @@ body.dark-mode .wishlist-item {
         }
     }
 
+    var NEW_PRODUCT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+    function isNewProduct(product) {
+        return !!(product.createdAt && (Date.now() - product.createdAt) < NEW_PRODUCT_WINDOW_MS);
+    }
+
     function productCardHtml(product) {
         var stock = (typeof product.stock === "number") ? product.stock : 0;
         var outOfStock = stock <= 0;
@@ -7385,7 +7513,10 @@ body.dark-mode .wishlist-item {
                 '<button type="button" class="product-wishlist-btn' + (inWishlist ? ' active' : '') + '" onclick="toggleWishlist(\'' + product.id + '\', event)" title="Add to wishlist">' +
                     '<svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-10-9.2C.5 8 2 4.5 5.4 3.7 7.7 3.1 10 4.2 12 6.5c2-2.3 4.3-3.4 6.6-2.8C22 4.5 23.5 8 22 11.3c-2.5 4.6-10 9.2-10 9.2z"/></svg>' +
                 '</button>' +
-                '<img src="' + product.image + '" alt="' + escapeHtml(product.name) + '">' +
+                '<div class="product-image-wrap">' +
+                    (isNewProduct(product) ? '<span class="product-new-ribbon">New</span>' : '') +
+                    '<img src="' + product.image + '" alt="' + escapeHtml(product.name) + '">' +
+                '</div>' +
                 '<h4>' + escapeHtml(product.name) + '</h4>' +
                 '<div class="ratings" id="rating-' + product.id + '"><h2>☆☆☆☆☆</h2></div>' +
                 '<p>' + priceDisplayHtml(product) + '</p>' +
@@ -7503,6 +7634,15 @@ body.dark-mode .wishlist-item {
         el.innerHTML = html;
     }
 
+    var newProductFilterActive = false;
+
+    function handleNewProductFilterChange() {
+        var checkbox = document.getElementById("newProductFilterCheckbox");
+        newProductFilterActive = !!(checkbox && checkbox.checked);
+        currentProductPage = 1;
+        renderProductGrid();
+    }
+
     function renderProductGrid() {
         var grid = document.getElementById("productGrid");
         if (!grid) return;
@@ -7511,11 +7651,16 @@ body.dark-mode .wishlist-item {
         var query = searchInput ? searchInput.value.trim().toLowerCase() : "";
 
         var ids = Object.keys(PRODUCTS).filter(function (id) {
-            return !query || PRODUCTS[id].name.toLowerCase().indexOf(query) !== -1;
+            var matchesQuery = !query || PRODUCTS[id].name.toLowerCase().indexOf(query) !== -1;
+            var matchesNewFilter = !newProductFilterActive || isNewProduct(PRODUCTS[id]);
+            return matchesQuery && matchesNewFilter;
         });
 
         if (ids.length === 0) {
-            grid.innerHTML = '<p class="product-search-empty">No products found for "' + escapeHtml(searchInput ? searchInput.value.trim() : "") + '".</p>';
+            var emptyMsg = newProductFilterActive
+                ? "No new products right now."
+                : 'No products found for "' + escapeHtml(searchInput ? searchInput.value.trim() : "") + '".';
+            grid.innerHTML = '<p class="product-search-empty">' + emptyMsg + '</p>';
             var paginationEl = document.getElementById("productPagination");
             if (paginationEl) paginationEl.innerHTML = "";
             return;
@@ -7964,7 +8109,8 @@ body.dark-mode .wishlist-item {
             image: newProductImageDataUrl,
             description: description,
             sizes: sizes,
-            stock: stock
+            stock: stock,
+            createdAt: Date.now()
         };
 
         _cloud.products[id] = product;
@@ -8137,7 +8283,8 @@ body.dark-mode .wishlist-item {
             description: description,
             sizes: sizes,
             stock: stock,
-            discount: discount
+            discount: discount,
+            createdAt: existing.createdAt
         };
 
         _cloud.products[productId] = updatedProduct;
@@ -9839,7 +9986,14 @@ body.dark-mode .wishlist-item {
             return o && !isOrderUnreadFor(o, user);
         });
 
-        saveOrdersList(orders.filter(function (o) { return idsToDelete.indexOf(o.id) === -1; }));
+        orders.forEach(function (o) {
+            if (idsToDelete.indexOf(o.id) !== -1) {
+                o.clearedBy = o.clearedBy || [];
+                if (o.clearedBy.indexOf(user.email) === -1) o.clearedBy.push(user.email);
+            }
+        });
+
+        saveOrdersList(orders);
 
         notifManualMode = false;
         notifSelectedIds = [];
@@ -9866,6 +10020,8 @@ body.dark-mode .wishlist-item {
             titleEl.textContent = "My Orders";
             orders = orders.filter(function (o) { return o.buyerEmail === user.email; });
         }
+
+        orders = orders.filter(function (o) { return !(o.clearedBy && o.clearedBy.indexOf(user.email) !== -1); });
 
         orders = orders.slice().reverse();
 
@@ -9965,7 +10121,14 @@ body.dark-mode .wishlist-item {
         var idsToRemove = scoped.filter(function (o) { return !isOrderUnreadFor(o, user); })
             .map(function (o) { return o.id; });
 
-        saveOrdersList(orders.filter(function (o) { return idsToRemove.indexOf(o.id) === -1; }));
+        orders.forEach(function (o) {
+            if (idsToRemove.indexOf(o.id) !== -1) {
+                o.clearedBy = o.clearedBy || [];
+                if (o.clearedBy.indexOf(user.email) === -1) o.clearedBy.push(user.email);
+            }
+        });
+
+        saveOrdersList(orders);
         renderOrdersPanel();
         refreshOrderUI();
     }
@@ -10010,35 +10173,38 @@ body.dark-mode .wishlist-item {
             return;
         }
 
-        listEl.innerHTML = orders.map(function (o) {
-            var role = getOrderRoleFor(o, user);
-            var statusLabel = o.status === "pending" ? "Pending Approval" : (o.status === "confirmed" ? "Confirmed" : (o.status === "delivered" ? "Delivered" : "Cancelled"));
+        var rows = [];
+        orders.forEach(function (o) {
+            (o.items || []).forEach(function (item) {
+                var metaParts = [];
+                if (item.size) metaParts.push("Size: " + item.size);
+                metaParts.push("Qty: " + item.qty);
 
-            var sellerNote = "";
-            if (o.sellerEmail && (role === "owner" || role === "seller-assigned")) {
-                sellerNote = '<div class="order-row-seller-note">Handled by: ' + escapeHtml(o.sellerName || "Seller") + '</div>';
-            }
+                rows.push(
+                    '<div class="order-history-item-row" onclick="goToProductFromOrderHistory(\'' + escapeHtml(item.id) + '\')">' +
+                        '<div class="order-history-item-info">' +
+                            '<div class="order-history-item-name">' + escapeHtml(item.name) + '</div>' +
+                            '<div class="order-history-item-meta">' + escapeHtml(metaParts.join(" \u00b7 ")) + '</div>' +
+                        '</div>' +
+                    '</div>'
+                );
+            });
+        });
 
-            var innerHtml =
-                '<div class="order-row-top">' +
-                    '<strong>₱' + o.total.toFixed(2) + '</strong>' +
-                    '<span class="order-status order-status-' + o.status + '">' + statusLabel + '</span>' +
-                '</div>' +
-                '<div class="order-row-items">' + escapeHtml(orderSummaryText(o)) + '</div>' +
-                sellerNote +
-                '<div class="order-row-footer">' +
-                    '<div class="order-row-buyer">' +
-                        (user.isOwner
-                            ? '<span class="buyer-name-link" onclick="openUserProfileView(\'' + escapeHtml(o.buyerEmail || "") + '\', \'' + escapeHtml(o.buyerName || "") + '\', event)">' + escapeHtml(o.buyerName) + '</span> — '
-                            : (role === "seller-pending" || role === "seller-assigned"
-                                ? escapeHtml(o.buyerName || "") + ' — '
-                                : '')) +
-                        escapeHtml(o.date) +
-                    '</div>' +
-                '</div>';
+        listEl.innerHTML = rows.length > 0
+            ? rows.join("")
+            : '<p class="orders-panel-empty">No orders yet.</p>';
+    }
 
-            return '<div class="order-row" onclick="openOrderAction(\'' + o.id + '\')">' + innerHtml + '</div>';
-        }).join("");
+    function goToProductFromOrderHistory(productId) {
+        var product = PRODUCTS[productId];
+        if (!product) {
+            alert("This product is no longer available.");
+            return;
+        }
+
+        closeOrderHistory();
+        openProductDetail(productId);
     }
 
     var orderTrackingTab = "toship";
