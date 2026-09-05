@@ -1504,6 +1504,175 @@ body.dark-mode .page-transition-overlay {
     margin-bottom: 4px;
 }
 
+.auth-id-upload-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: -6px;
+}
+
+.auth-form input[type="file"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px dashed #ccc;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 12px;
+    background: #fafafa;
+}
+
+.auth-id-upload-note {
+    font-size: 11px;
+    color: #777;
+    margin: -6px 0 0;
+    line-height: 1.5;
+}
+
+.auth-id-preview {
+    max-width: 100%;
+    max-height: 160px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    object-fit: contain;
+    align-self: flex-start;
+}
+
+.auth-id-preview-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.auth-id-preview-row .auth-id-preview {
+    flex: 1;
+    min-width: 0;
+    max-height: 130px;
+}
+
+.auth-submit[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.auth-scan-btn {
+    background: #fff;
+    color: #145A32;
+    border: 1px solid #145A32;
+}
+
+.auth-scan-btn:hover {
+    background: #eafaf0;
+}
+
+.auth-link-btn {
+    background: #fff;
+    color: #555;
+    border: 1px solid #ddd;
+}
+
+.id-scan-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 6500;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.id-scan-overlay.show {
+    display: flex;
+}
+
+.id-scan-box {
+    position: relative;
+    background: #fff;
+    width: 100%;
+    max-width: 420px;
+    border-radius: 15px;
+    padding: 35px 20px 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+    text-align: center;
+}
+
+.id-scan-title {
+    font-weight: 700;
+    color: #222;
+    margin: 0 0 6px;
+}
+
+.id-scan-hint {
+    font-size: 12px;
+    color: #777;
+    margin: 0 0 14px;
+    line-height: 1.5;
+}
+
+.id-scan-frame-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: #111;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.id-scan-frame-wrap video,
+.id-scan-frame-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.id-scan-guide {
+    position: absolute;
+    inset: 12% 8%;
+    border: 2px dashed rgba(255, 255, 255, 0.85);
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+.id-scan-guide.id-scan-guide-face {
+    inset: 8% 22%;
+    border-radius: 50%;
+}
+
+.id-scan-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.id-scan-actions .btn {
+    flex: 1;
+}
+
+body.dark-mode .id-scan-box {
+    background: #1c1c1c;
+}
+
+body.dark-mode .id-scan-title {
+    color: #eee;
+}
+
+body.dark-mode .id-scan-hint {
+    color: #999;
+}
+
+body.dark-mode .auth-scan-btn {
+    background: #1c1c1c;
+    color: #66bb6a;
+    border-color: #66bb6a;
+}
+
+body.dark-mode .auth-link-btn {
+    background: #262626;
+    color: #ccc;
+    border-color: #444;
+}
+
 .auth-demo-code {
     display: inline-block;
     margin-top: 6px;
@@ -4830,10 +4999,20 @@ body.dark-mode .wishlist-item {
                 <option value="" disabled selected>I am a...</option>
                 <option value="Teacher">Teacher</option>
                 <option value="Student">Student</option>
+                <option value="Parent">Parent</option>
             </select>
             <input type="text" id="signupStudentId" placeholder="Student ID" style="display:none;">
+
+            <label class="auth-id-upload-label" id="signupIdUploadLabel">Student/Teacher ID or National ID + Selfie</label>
+            <button type="button" class="btn auth-scan-btn" id="signupScanBtn" onclick="startIdScanFlow()">📷 Scan ID &amp; Selfie</button>
+            <p class="auth-id-upload-note" id="signupIdUploadNote">Piliin muna ang role sa itaas — Student ID, Teacher ID, o National ID (para sa Parent) ang isscan mo, tapos selfie na hawak ito.</p>
+            <div class="auth-id-preview-row">
+                <img id="signupIdPreview" class="auth-id-preview" style="display:none;" alt="Scanned ID preview">
+                <img id="signupSelfiePreview" class="auth-id-preview" style="display:none;" alt="Selfie with ID preview">
+            </div>
+
             <p class="auth-error" id="signupError"></p>
-            <button type="submit" class="btn auth-submit">Send Verification Code</button>
+            <button type="submit" class="btn auth-submit" id="signupSubmitBtn">Send Verification Code</button>
         </form>
 
         <form id="signupVerifyForm" class="auth-form" onsubmit="return handleVerifySignup(event)">
@@ -4876,6 +5055,31 @@ body.dark-mode .wishlist-item {
 
     </div>
 
+</div>
+
+<div class="id-scan-overlay" id="idScanOverlay">
+    <div class="id-scan-box">
+        <button type="button" class="modal-close" onclick="closeIdScanner()">&times;</button>
+        <p class="id-scan-title" id="idScanTitle">Scan your school/faculty ID</p>
+        <p class="id-scan-hint" id="idScanHint">I-align ang ID sa loob ng frame, siguraduhing malinaw at walang glare.</p>
+
+        <div class="id-scan-frame-wrap">
+            <video id="idScanVideo" autoplay playsinline muted></video>
+            <canvas id="idScanCanvas" style="display:none;"></canvas>
+            <img id="idScanSnapshot" style="display:none;" alt="Captured photo">
+            <div class="id-scan-guide" id="idScanGuide"></div>
+        </div>
+
+        <p class="auth-error" id="idScanError"></p>
+
+        <div class="id-scan-actions" id="idScanLiveActions">
+            <button type="button" class="btn auth-submit" onclick="captureIdPhoto()">Capture</button>
+        </div>
+        <div class="id-scan-actions" id="idScanReviewActions" style="display:none;">
+            <button type="button" class="btn auth-link-btn" onclick="retakeIdPhoto()">Retake</button>
+            <button type="button" class="btn auth-submit" onclick="confirmIdPhoto()">Use This Photo</button>
+        </div>
+    </div>
 </div>
 
 <div class="modal-overlay" id="productOverlay">
@@ -6815,21 +7019,198 @@ body.dark-mode .wishlist-item {
         return String(Math.floor(100000 + Math.random() * 900000));
     }
 
+    var ROLE_ID_LABELS = {
+        Student: "Student ID",
+        Teacher: "Teacher ID",
+        Parent: "National ID"
+    };
+
     function toggleSignupStudentId() {
         var role = document.getElementById("signupRole").value;
         var field = document.getElementById("signupStudentId");
         field.style.display = (role === "Student") ? "block" : "none";
         if (role !== "Student") field.value = "";
+
+        var idLabel = ROLE_ID_LABELS[role];
+        var uploadLabel = document.getElementById("signupIdUploadLabel");
+        var uploadNote = document.getElementById("signupIdUploadNote");
+        if (idLabel) {
+            uploadLabel.textContent = idLabel + " + Selfie";
+            uploadNote.textContent = "I-sscan ang iyong " + idLabel + ", tapos kukunan ka ng selfie na hawak ito sa tabi ng mukha mo — AI mismo ang mag-veverify.";
+        } else {
+            uploadLabel.textContent = "Student/Teacher ID or National ID + Selfie";
+            uploadNote.textContent = "Piliin muna ang role sa itaas — Student ID, Teacher ID, o National ID (para sa Parent) ang isscan mo, tapos selfie na hawak ito.";
+        }
     }
 
     function openAuthModal() {
         authOverlay.classList.add("show");
         toggleSignupStudentId();
+        resetIdScanState();
     }
 
     function closeAuthModal(e) {
         if (e) e.preventDefault();
         authOverlay.classList.remove("show");
+    }
+
+    function resetIdScanState() {
+        idScanMode = "id";
+        signupCapturedIdImage = null;
+        signupCapturedSelfieImage = null;
+        idScanPendingDataUrl = null;
+        var idPreview = document.getElementById("signupIdPreview");
+        var selfiePreview = document.getElementById("signupSelfiePreview");
+        var scanBtn = document.getElementById("signupScanBtn");
+        if (idPreview) { idPreview.style.display = "none"; idPreview.src = ""; }
+        if (selfiePreview) { selfiePreview.style.display = "none"; selfiePreview.src = ""; }
+        if (scanBtn) scanBtn.textContent = "📷 Scan ID & Selfie";
+    }
+
+    var VERIFY_ID_ENDPOINT = "https://shop-production-bc79.up.railway.app/api/verify-id";
+
+    var idScanStream = null;
+    var idScanMode = "id"; // "id" -> scan ng ID card; "selfie" -> selfie na hawak ang ID
+    var signupCapturedIdImage = null;     // data URL ng na-confirm na ID scan
+    var signupCapturedSelfieImage = null; // data URL ng na-confirm na selfie+ID
+
+    function startIdScanFlow() {
+        var role = document.getElementById("signupRole").value;
+        if (!role) {
+            document.getElementById("signupError").textContent = "Please select whether you are a Teacher, Student, or Parent first.";
+            return;
+        }
+
+        // Laging magsimula sa "id" step para hindi mapagsamang mismatched
+        // ang ID at selfie mula sa magkaibang pagkakataon.
+        signupCapturedIdImage = null;
+        signupCapturedSelfieImage = null;
+        document.getElementById("signupIdPreview").style.display = "none";
+        document.getElementById("signupSelfiePreview").style.display = "none";
+        idScanMode = "id";
+        openIdScanner();
+    }
+
+    function openIdScanner() {
+        var overlay = document.getElementById("idScanOverlay");
+        var video = document.getElementById("idScanVideo");
+        var errorEl = document.getElementById("idScanError");
+        var guide = document.getElementById("idScanGuide");
+        var title = document.getElementById("idScanTitle");
+        var hint = document.getElementById("idScanHint");
+        var isSelfieStep = (idScanMode === "selfie");
+
+        errorEl.textContent = "";
+        document.getElementById("idScanSnapshot").style.display = "none";
+        video.style.display = "block";
+        document.getElementById("idScanLiveActions").style.display = "flex";
+        document.getElementById("idScanReviewActions").style.display = "none";
+
+        guide.classList.toggle("id-scan-guide-face", isSelfieStep);
+        var idLabel = ROLE_ID_LABELS[document.getElementById("signupRole").value] || "ID";
+        title.textContent = isSelfieStep ? ("Selfie with your " + idLabel) : ("Scan your " + idLabel);
+        hint.textContent = isSelfieStep ?
+            "Hawak ang parehong " + idLabel + " sa tabi ng mukha mo, siguraduhing pareho itong malinaw." :
+            "I-align ang " + idLabel + " sa loob ng frame, siguraduhing malinaw at walang glare.";
+
+        overlay.classList.add("show");
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            errorEl.textContent = "Hindi supported ng browser mo ang camera scan. Subukan sa ibang browser (Chrome/Safari) o device.";
+            return;
+        }
+
+        navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: isSelfieStep ? "user" : "environment",
+                width: { ideal: 1280 },
+                height: { ideal: 960 }
+            },
+            audio: false
+        }).then(function (stream) {
+            idScanStream = stream;
+            video.srcObject = stream;
+        }).catch(function (err) {
+            console.error("camera error:", err);
+            errorEl.textContent = "Hindi ma-access ang camera. Payagan ang camera permission at subukan ulit.";
+        });
+    }
+
+    function stopIdScanStream() {
+        if (idScanStream) {
+            idScanStream.getTracks().forEach(function (t) { t.stop(); });
+            idScanStream = null;
+        }
+    }
+
+    function closeIdScanner() {
+        stopIdScanStream();
+        document.getElementById("idScanOverlay").classList.remove("show");
+    }
+
+    function captureIdPhoto() {
+        var video = document.getElementById("idScanVideo");
+        var canvas = document.getElementById("idScanCanvas");
+        var snapshot = document.getElementById("idScanSnapshot");
+        var errorEl = document.getElementById("idScanError");
+
+        if (!video.videoWidth) {
+            errorEl.textContent = "Hindi pa ready ang camera, sandali lang at subukan ulit.";
+            return;
+        }
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        var dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+        snapshot.src = dataUrl;
+        snapshot.style.display = "block";
+        video.style.display = "none";
+
+        stopIdScanStream();
+
+        document.getElementById("idScanLiveActions").style.display = "none";
+        document.getElementById("idScanReviewActions").style.display = "flex";
+        errorEl.textContent = "";
+
+        idScanPendingDataUrl = dataUrl;
+    }
+
+    var idScanPendingDataUrl = null;
+
+    function retakeIdPhoto() {
+        idScanPendingDataUrl = null;
+        openIdScanner();
+    }
+
+    function confirmIdPhoto() {
+        if (!idScanPendingDataUrl) return;
+
+        if (idScanMode === "id") {
+            signupCapturedIdImage = idScanPendingDataUrl;
+            idScanPendingDataUrl = null;
+
+            var idPreview = document.getElementById("signupIdPreview");
+            idPreview.src = signupCapturedIdImage;
+            idPreview.style.display = "block";
+
+            // Deretso sa susunod na step — selfie habang hawak ang ID.
+            idScanMode = "selfie";
+            openIdScanner();
+            return;
+        }
+
+        signupCapturedSelfieImage = idScanPendingDataUrl;
+        idScanPendingDataUrl = null;
+
+        var selfiePreview = document.getElementById("signupSelfiePreview");
+        selfiePreview.src = signupCapturedSelfieImage;
+        selfiePreview.style.display = "block";
+        document.getElementById("signupScanBtn").textContent = "📷 Re-scan ID & Selfie";
+
+        idScanMode = "id";
+        closeIdScanner();
     }
 
     function handleSignUp(e) {
@@ -6842,6 +7223,7 @@ body.dark-mode .wishlist-item {
         var role = document.getElementById("signupRole").value;
         var studentId = document.getElementById("signupStudentId").value.trim();
         var errorEl = document.getElementById("signupError");
+        var submitBtn = document.getElementById("signupSubmitBtn");
 
         if (!isValidUsername(username)) {
             errorEl.textContent = "Username must start with @ and be 3-20 letters, numbers, or underscores (e.g. @CVSPEE2026).";
@@ -6859,12 +7241,17 @@ body.dark-mode .wishlist-item {
         }
 
         if (!role) {
-            errorEl.textContent = "Please select whether you are a Teacher or Student.";
+            errorEl.textContent = "Please select whether you are a Teacher, Student, or Parent.";
             return false;
         }
 
         if (role === "Student" && !studentId) {
             errorEl.textContent = "Please enter your Student ID.";
+            return false;
+        }
+
+        if (!signupCapturedIdImage || !signupCapturedSelfieImage) {
+            errorEl.textContent = "Please scan your ID and take the selfie holding it.";
             return false;
         }
 
@@ -6878,7 +7265,41 @@ body.dark-mode .wishlist-item {
         }
 
         errorEl.textContent = "";
-        sendSignupCode(name, username, email, password, role, studentId);
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Verifying ID...";
+
+        fetch(VERIFY_ID_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                image: signupCapturedIdImage,
+                mimeType: "image/jpeg",
+                selfieImage: signupCapturedSelfieImage,
+                selfieMimeType: "image/jpeg",
+                role: role,
+                name: name
+            })
+        }).then(function (res) {
+            return res.json();
+        }).then(function (result) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Send Verification Code";
+
+            if (!result || result.valid !== true) {
+                errorEl.textContent = (result && result.reason) ||
+                    "We couldn't verify your ID as a valid " + role.toLowerCase() +
+                    " ID. Please re-scan with a clearer shot, or contact support if this seems wrong.";
+                return;
+            }
+
+            errorEl.textContent = "";
+            sendSignupCode(name, username, email, password, role, studentId);
+        }).catch(function (err) {
+            console.error("verify-id error:", err);
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Send Verification Code";
+            errorEl.textContent = "Couldn't verify your ID right now (network error). Please try again.";
+        });
 
         return false;
     }
@@ -6988,6 +7409,7 @@ body.dark-mode .wishlist-item {
             localStorage.removeItem("athletica_pending_signup");
 
             errorEl.textContent = "";
+            resetIdScanState();
             closeAuthModal();
             renderAccount();
         });
