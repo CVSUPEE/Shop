@@ -36,6 +36,9 @@
 # endpoint URLs sa index.html.
 # ============================================================
 
+import base64
+import binascii
+import json
 import os
 import random
 import re
@@ -52,6 +55,52 @@ client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 # Gemini 3.5 Flash-Lite — pinakamataas na free-tier quota sa mga
 # available na Gemini model ngayon (mas mataas kaysa gemini-3.6-flash).
 MODEL = "gemini-3.5-flash-lite"
+
+# Kailangan ng model na "sees" ang larawan (vision) para sa ID check.
+# Ang flash-lite ay multimodal din, pero kung mag-eeror ito sa images
+# sa iyong quota/region, pwede mong palitan ito ng "gemini-3.5-flash".
+VISION_MODEL = "gemini-3.5-flash-lite"
+
+MAX_ID_IMAGE_BYTES = 6 * 1024 * 1024  # ~6MB pagkatapos i-decode
+
+# Anong uri ng ID ang inaasahan/kailangan bawat role sa Sign Up, at
+# paano dapat suriin ng AI kung tugma ang ID sa role na iyon.
+ROLE_ID_REQUIREMENTS = {
+    "Student": {
+        "label": "Student ID",
+        "match_instruction": (
+            "Base sa nakasulat/nakalimbag sa ID (hal. \"Student\", "
+            "pangalan ng paaralan, course/year level, student number, "
+            "atbp.), malinaw bang isa itong STUDENT ID (ID card na "
+            "inisyu ng isang paaralan/unibersidad/kolehiyo sa isang "
+            "mag-aaral)?"
+        ),
+    },
+    "Teacher": {
+        "label": "Teacher ID",
+        "match_instruction": (
+            "Base sa nakasulat/nakalimbag sa ID (hal. \"Faculty\", "
+            "\"Teacher\", \"Employee\", department, employee number, "
+            "atbp.), malinaw bang isa itong TEACHER/FACULTY/EMPLOYEE ID "
+            "(ID card na inisyu ng isang paaralan sa isang guro/kawani, "
+            "HINDI student ID)?"
+        ),
+    },
+    "Parent": {
+        "label": "National ID",
+        "match_instruction": (
+            "Ito ay dapat isang GOVERNMENT-ISSUED NATIONAL ID (hal. "
+            "Philippine National ID/PhilSys ID, o national ID mula sa "
+            "ibang bansa) — HINDI school ID. Hindi mo dapat asahan na "
+            "may nakasulat na \"Parent\" sa mismong ID (wala talagang "
+            "ganitong national ID); ang tinitignan mo lang ay kung "
+            "ito ba ay isang totoong-mukhang national/government ID "
+            "card ng isang matanda (may national ID number, "
+            "issuing government authority, atbp.), hindi school ID o "
+            "ibang uri ng card."
+        ),
+    },
+}
 
 
 # ============================================================
@@ -232,6 +281,197 @@ def _varied_no_reply(message):
 
 
 # ============================================================
+# /api/verify-id — AI check ng school/work ID + selfie sa Sign Up
+# ============================================================
+#
+# IMPORTANTE — mangyaring basahin bago i-deploy:
+#
+# Ito ay isang HEURISTIC / "best-effort" na check lamang gamit ang
+# Gemini vision. HINDI ito totoong government-grade o school-grade
+# identity verification (walang totoong liveness detection dito —
+# selfie photo lang ito, hindi video, kaya kaya pa rin itong linlangin
+# ng determinadong tao gamit ang huwad na ID + huwad/AI-generated na
+# "selfie"). Ang pagsama ng selfie-holding-ID ay malaking hadlang na
+# sa mga basta kumuha lang ng litrato ng ID ng ibang tao mula sa
+# internet/social media, pero HINDI ito kapalit ng tunay na KYC
+# (hal. Sumsub/Onfido/Persona) kung kailangan mo ng mataas na
+# seguridad.
+#
+# Privacy note: ang mga larawan (ID + selfie) ay ipinapadala lamang
+# papunta sa Gemini para sa isang beses na pagsusuri — HINDI ito
+# ise-save sa disk o database dito sa endpoint na ito. Kung
+# kakailanganin mo ng audit trail sa hinaharap, kakailanganin mo
+# dagdagan ito ng sarili mong secure storage — huwag basta mag-imbak
+# ng ID/selfie photos nang walang encryption at malinaw na retention
+# policy, dahil sensitive personal data ito (kasama na ang mukha ng
+# tao).
+@app.route("/api/verify-id", methods=["POST"])
+def verify_id():
+    data = request.get_json(silent=True) or {}
+    role = (data.get("role") or "").strip()
+    name = (data.get("name") or "").strip()
+
+    if role not in ROLE_ID_REQUIREMENTS:
+        return jsonify({"error": "Missing or invalid role."}), 400
+
+    id_bytes, id_mime, err = _decode_image(
+        data.get("image"), data.get("mimeType") or "image/jpeg"
+    )
+    if err:
+        return jsonify({"error": "ID image: " + err}), 400
+
+    selfie_bytes, selfie_mime, err = _decode_image(
+        data.get("selfieImage"), data.get("selfieMimeType") or "image/jpeg"
+    )
+    if err:
+        return jsonify({"error": "Selfie image: " + err}), 400
+
+    id_req = ROLE_ID_REQUIREMENTS[role]
+
+    prompt = "\n".join([
+        "May dalawang larawan na ipinasa ng isang taong nagpa-sign-up",
+        "bilang \"" + role + "\" sa isang online shop para sa school",
+        "supplies/apparel. Ang inaasahang uri ng ID para sa role na ito",
+        "ay: " + id_req["label"] + ".",
+        "  Larawan 1: litrato ng kanilang " + id_req["label"] + ".",
+        "  Larawan 2: isang selfie kung saan hawak nila ang PAREHONG",
+        "             ID card sa tabi/malapit sa kanilang mukha.",
+        "Ang pangalang isinulat nila sa form ay: \"" +
+        (name or "(walang ibinigay)") + "\".",
+        "",
+        "Suriin mo ang DALAWANG larawan nang magkasama:",
+        "1. May makikitang totoong ID card ba sa Larawan 1 (hindi",
+        "   random na bagay, hindi blangkong screen, hindi halatang",
+        "   litrato ng litrato mula sa ibang screen)?",
+        "2. " + id_req["match_instruction"],
+        "3. Sa Larawan 2, may makikita bang tao na hawak ang isang ID",
+        "   card sa tabi ng kanyang mukha, at MUKHANG PAREHONG ID ito",
+        "   sa nasa Larawan 1 (parehong kulay/disenyo/laman, hindi",
+        "   ibang card)?",
+        "4. Kung may litrato ng may-ari sa mismong ID card, tugma ba",
+        "   ito o katulad ng mukha ng taong humahawak nito sa",
+        "   Larawan 2?",
+        "5. Kung may nakikitang pangalan sa ID, malapit ba ito o tugma",
+        "   sa pangalang \"" + (name or "(wala)") + "\"? (Huwag masyadong",
+        "   mahigpit — pwedeng magkaiba ng ayos/spelling nang bahagya.)",
+        "6. May halatang palatandaan ba ng pandaraya sa alinman sa",
+        "   dalawang larawan (obvious digital editing, mismatched",
+        "   fonts, halatang photoshopped na text, larawan ng screen na",
+        "   may mga artifact, o Larawan 2 na mukhang litrato lang ng",
+        "   isa pang litrato sa halip na live na selfie)?",
+        "",
+        "Sumagot ka LAMANG ng isang JSON object, walang ibang teksto,",
+        "walang markdown code fence, sa eksaktong ganitong format:",
+        '{"valid": true or false, "reason": "isang maikling pangungusap '
+        'kung bakit, sa Taglish, na ipapakita sa user"}',
+        "",
+        "Ilagay na \"valid\": false kung: hindi malinaw na ID card ang",
+        "nasa Larawan 1; hindi ito " + id_req["label"] + " (o hindi",
+        "sapat na katulad nito); walang makikitang taong hawak ang ID",
+        "sa Larawan 2 o iba ang ID na hawak; halatang hindi tugma ang",
+        "mukha sa ID sa taong humahawak nito; o may malinaw na",
+        "palatandaan ng pandaraya. Kung medyo malabo lang ang mga",
+        "larawan pero may sapat namang batayan na tama ang uri ng ID",
+        "at pareho ang hawak na ID sa dalawang larawan, \"valid\": true",
+        "pa rin — huwag masyadong mahigpit sa larawang malabo/may",
+        "glare, basta't makatwiran.",
+    ])
+
+    try:
+        response = client.models.generate_content(
+            model=VISION_MODEL,
+            contents=[
+                types.Content(
+                    role="user",
+                    parts=[
+                        types.Part.from_bytes(data=id_bytes, mime_type=id_mime),
+                        types.Part.from_bytes(data=selfie_bytes, mime_type=selfie_mime),
+                        types.Part(text=prompt),
+                    ],
+                )
+            ],
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+            ),
+        )
+    except Exception as e:
+        print("verify-id error:", e)
+        # Fail CLOSED (i.e. huwag i-approve) kapag nag-error ang AI check,
+        # dahil ito ang gate bago malikha ang account.
+        return jsonify({
+            "valid": False,
+            "reason": "Hindi namin na-verify ang ID ngayon dahil sa technical error. "
+                      "Pakisubukan ulit, o makipag-ugnayan sa Contact Support.",
+        }), 200
+
+    raw_text = ""
+    candidate = response.candidates[0] if response.candidates else None
+    if candidate and candidate.content and candidate.content.parts:
+        for part in candidate.content.parts:
+            if getattr(part, "text", None):
+                raw_text += part.text
+
+    result = _parse_verify_json(raw_text)
+    if result is None:
+        return jsonify({
+            "valid": False,
+            "reason": "Hindi malinaw ang resulta ng pag-verify. Pakisubukan ulit "
+                      "gamit ang mas malinaw na mga larawan.",
+        }), 200
+
+    return jsonify({
+        "valid": bool(result.get("valid")),
+        "reason": result.get("reason") or "",
+    })
+
+
+def _decode_image(image_b64, mime_type):
+    """Kunin at i-decode ang isang base64/data-URL na larawan.
+    Nagbabalik ng (bytes, mime_type, error_message). Kapag may
+    error_message, walang laman ang bytes/mime_type."""
+    image_b64 = image_b64 or ""
+    mime_type = (mime_type or "image/jpeg").strip()
+
+    if not image_b64:
+        return None, None, "missing image."
+    if mime_type not in ("image/jpeg", "image/png", "image/webp", "image/heic"):
+        return None, None, "unsupported image type."
+
+    if "," in image_b64 and image_b64.strip().lower().startswith("data:"):
+        image_b64 = image_b64.split(",", 1)[1]
+
+    try:
+        image_bytes = base64.b64decode(image_b64, validate=True)
+    except (binascii.Error, ValueError):
+        return None, None, "invalid image data."
+
+    if not image_bytes:
+        return None, None, "empty image."
+    if len(image_bytes) > MAX_ID_IMAGE_BYTES:
+        return None, None, "image too large."
+
+    return image_bytes, mime_type, None
+
+
+def _parse_verify_json(raw_text):
+    """Subukang i-parse ang JSON na sinagot ng model, kahit may
+    nakapaligid pang whitespace/code fence na naisama."""
+    text = (raw_text or "").strip()
+    if text.startswith("```"):
+        text = text.strip("`")
+        if text.lower().startswith("json"):
+            text = text[4:]
+        text = text.strip()
+    try:
+        parsed = json.loads(text)
+        if isinstance(parsed, dict) and "valid" in parsed:
+            return parsed
+    except (json.JSONDecodeError, TypeError):
+        pass
+    return None
+
+
+# ============================================================
 # /api/support-chat — general "Contact Support" assistant
 # (tungkol lang sa website / produkto / account)
 # ============================================================
@@ -247,10 +487,19 @@ SITE_KNOWLEDGE = "\n".join([
     "1. I-tap ang Account icon sa navbar, pumunta sa \"Sign Up\" tab.",
     "2. Punan ang Full Name, Username (hal. @CVSPEE2026), Email, at "
     "Password (kailangan 6+ characters).",
-    "3. Piliin ang role (hal. student/teacher); kung kailangan, ilagay "
-    "ang Student ID.",
-    "4. I-submit ang form — magpapadala ng 6-digit verification code sa "
-    "email; ilagay ang code para matapos ang pag-sign up.",
+    "3. Piliin ang role (Student, Teacher, o Parent), tapos i-tap ang "
+    "\"Scan ID & Selfie\" — mag-sscan gamit ang camera ng kaukulang ID "
+    "(Student ID para sa Student, Teacher ID para sa Teacher, National "
+    "ID para sa Parent), tapos kukuha ng selfie na hawak ang parehong "
+    "ID sa tabi ng mukha. Awtomatikong susuriin ito ng AI kung tugma "
+    "sa napiling role at kung magkatugma ang taong nag-selfie sa ID.",
+    "4. Kung ma-verify ang mga larawan, i-submit ang form — "
+    "magpapadala ng 6-digit verification code sa email; ilagay ang "
+    "code para matapos ang pag-sign up. Kung hindi ma-verify (hal. "
+    "malabong larawan, hindi tugma ang role, o hindi tugma ang "
+    "selfie sa ID), hindi ito papayagang mag-proceed — pakisubukan "
+    "ulit gamit ang mas malinaw na scan, o makipag-ugnayan sa "
+    "Contact page kung tama namang tama ang mga ito.",
     "",
     "Paano mag-login (Sign In):",
     "1. I-tap ang Account icon, sa \"Sign In\" tab.",
