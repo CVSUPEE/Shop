@@ -7466,6 +7466,24 @@ body.dark-mode .wishlist-item {
             (reason ? " Reason: " + reason : "");
     }
 
+    function downscaleDataUrl(dataUrl, maxWidth, quality) {
+        return new Promise(function (resolve) {
+            var img = new Image();
+            img.onload = function () {
+                var scale = Math.min(1, maxWidth / img.width);
+                var w = Math.round(img.width * scale);
+                var h = Math.round(img.height * scale);
+                var canvas = document.createElement("canvas");
+                canvas.width = w;
+                canvas.height = h;
+                canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+                resolve(canvas.toDataURL("image/jpeg", quality));
+            };
+            img.onerror = function () { resolve(null); };
+            img.src = dataUrl;
+        });
+    }
+
     function handleSignUp(e) {
         e.preventDefault();
 
@@ -7552,7 +7570,17 @@ body.dark-mode .wishlist-item {
             }
 
             errorEl.textContent = "";
-            sendSignupCode(name, username, email, password, role, studentId);
+            submitBtn.textContent = "Preparing your account...";
+
+            // Keep small, storage-friendly copies of the photos so an
+            // admin can review them later in the panel — separate from
+            // the larger copies already sent to the AI check above.
+            Promise.all([
+                downscaleDataUrl(signupCapturedIdImage, 700, 0.6),
+                downscaleDataUrl(signupCapturedSelfieImage, 700, 0.6)
+            ]).then(function (photos) {
+                sendSignupCode(name, username, email, password, role, studentId, photos[0], photos[1]);
+            });
         }).catch(function (err) {
             console.error("verify-id error:", err);
             submitBtn.disabled = false;
@@ -7577,11 +7605,12 @@ body.dark-mode .wishlist-item {
         });
     }
 
-    function sendSignupCode(name, username, email, password, role, studentId) {
+    function sendSignupCode(name, username, email, password, role, studentId, idPhoto, selfiePhoto) {
         var code = generateCode();
 
         localStorage.setItem("athletica_pending_signup", JSON.stringify({
-            name: name, username: username, email: email, password: password, role: role, studentId: studentId || "", idVerified: true, code: code
+            name: name, username: username, email: email, password: password, role: role, studentId: studentId || "", idVerified: true,
+            idPhoto: idPhoto || "", selfiePhoto: selfiePhoto || "", code: code
         }));
 
         document.getElementById("signupVerifyNote").innerHTML =
@@ -7665,6 +7694,21 @@ body.dark-mode .wishlist-item {
             return users;
         }, function () {
             setCurrentUser(pending.email);
+
+            // Store the ID/selfie photos in their own per-user document —
+            // NOT inside the shared users list doc — so the panel can
+            // show them to the owner without risking that shared doc
+            // growing past Firestore's per-document size limit.
+            if (pending.idPhoto || pending.selfiePhoto) {
+                db.collection("athletica").doc("idPhotosRoot").collection("byEmail").doc(pending.email).set({
+                    idImage: pending.idPhoto || "",
+                    selfieImage: pending.selfiePhoto || "",
+                    name: pending.name || "",
+                    role: pending.role || "",
+                    submittedAt: new Date().toISOString()
+                }).catch(function (err) { console.error("id photo store error:", err); });
+            }
+
             localStorage.removeItem("athletica_pending_signup");
 
             errorEl.textContent = "";
