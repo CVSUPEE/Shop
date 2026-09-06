@@ -145,7 +145,7 @@ nav ul li a {
 }
 
 nav ul li a:hover {
-    color: #145A32;
+    color: #1F3A2E;
 }
 
 .col-2 {
@@ -200,7 +200,7 @@ nav ul li a:hover {
 
 .btn {
     display: inline-block;
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff;
     padding: 8px 30px;
     margin: 30px 5px;
@@ -209,7 +209,7 @@ nav ul li a:hover {
 }
 
 .btn:hover {
-    background: #0d3d22;
+    background: #172B22;
 }
 
 .header {
@@ -225,7 +225,8 @@ nav ul li a:hover {
     top: 0;
     left: 0;
     width: 100%;
-    background: #fff;
+    background: #1F3A2E;
+    border-bottom: 3px solid #C9A66B;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     z-index: 4000;
 }
@@ -234,13 +235,21 @@ nav ul li a:hover {
     padding: 15px 20px;
 }
 
+.site-navbar nav ul li a {
+    color: #fff;
+}
+
+.site-navbar nav ul li a:hover {
+    color: #FFC72C;
+}
+
 #pagesWrapper {
-    padding-top: 100px;
+    padding-top: 125px;
 }
 
 @media only screen and (max-width: 800px) {
     #pagesWrapper {
-        padding-top: 90px;
+        padding-top: 111px;
     }
 }
 
@@ -266,7 +275,7 @@ nav ul li a:hover {
 
 .title::after {
     content: '';
-    background: #145A32;
+    background: #1F3A2E;
     width: 80px;
     height: 5px;
     border-radius: 5px;
@@ -286,7 +295,7 @@ h4 {
 }
 
 .ratings h2 {
-    color: #145A32;
+    color: #1F3A2E;
 }
 
 .offer {
@@ -327,7 +336,7 @@ small {
 
 .investors h1 {
     font-size: 34px;
-    color: #145A32;
+    color: #1F3A2E;
 }
 
 .col-3 p {
@@ -383,7 +392,7 @@ small {
 }
 
 .profile-username {
-    color: #145A32;
+    color: #1F3A2E;
     font-weight: 600;
     margin: -8px 0 6px;
 }
@@ -408,7 +417,7 @@ small {
 
 .user-search-input:focus {
     outline: none;
-    border-color: #145A32;
+    border-color: #1F3A2E;
 }
 
 .user-search-icon {
@@ -461,7 +470,7 @@ small {
     height: 40px;
     min-width: 40px;
     border-radius: 50%;
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff;
     display: flex;
     align-items: center;
@@ -481,6 +490,11 @@ small {
     font-weight: 600;
     font-size: 14px;
     color: #333;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    row-gap: 3px;
 }
 
 .user-search-tag {
@@ -488,11 +502,34 @@ small {
     font-size: 10px;
     font-weight: bold;
     color: #fff;
-    background: #145A32;
+    background: #1F3A2E;
     padding: 1px 7px;
     border-radius: 8px;
     vertical-align: middle;
-    margin-left: 4px;
+}
+
+.user-search-tag.tag-owner {
+    background: #1F3A2E;
+}
+
+.user-search-tag.tag-admin {
+    background: #5e35b1;
+}
+
+.user-search-tag.tag-seller {
+    background: #1565c0;
+}
+
+.user-search-tag.tag-role {
+    background: #8d6e00;
+}
+
+.user-search-tag.tag-verified {
+    background: #1e8449;
+}
+
+.user-search-tag.tag-unverified {
+    background: #c0392b;
 }
 
 .user-search-username {
@@ -617,13 +654,13 @@ body.dark-mode .user-search-username {
     display: block;
     width: 100%;
     height: 3px;
-    background: #333;
+    background: #fff;
     border-radius: 3px;
     transition: background 0.3s ease;
 }
 
 .hamburger-btn:hover span {
-    background: #145A32;
+    background: #FFC72C;
 }
 
 .side-menu-overlay {
@@ -690,7 +727,7 @@ body.dark-mode .user-search-username {
 }
 
 .side-menu-close:hover {
-    color: #145A32;
+    color: #1F3A2E;
 }
 
 .side-menu-list li {
@@ -708,7 +745,7 @@ body.dark-mode .user-search-username {
 
 .side-menu-list li a:hover {
     background: #d4f0da;
-    color: #145A32;
+    color: #1F3A2E;
 }
 
 .side-menu-footer {
@@ -764,7 +801,7 @@ body.dark-mode .user-search-username {
 }
 
 .dark-mode-switch input:checked + .dark-mode-slider {
-    background-color: #145A32;
+    background-color: #1F3A2E;
 }
 
 .dark-mode-switch input:checked + .dark-mode-slider::before {
@@ -775,20 +812,14 @@ body.dark-mode {
     background: #121212;
 }
 
-body.dark-mode .site-navbar,
 body.dark-mode .side-menu,
 body.dark-mode .header,
 body.dark-mode .offer {
     background: #1a1a1a;
 }
 
-body.dark-mode .hamburger-btn span {
-    background: #ffc72c;
-}
-
-body.dark-mode .hamburger-btn:hover span {
-    background: #ffd966;
-}
+/* .site-navbar deliberately stays green in dark mode too — see base
+   .site-navbar rule above (this is intentional, not an oversight). */
 
 body.dark-mode p,
 body.dark-mode h4,
@@ -809,12 +840,12 @@ body.dark-mode h3 {
 }
 
 body.dark-mode .ratings h2 {
-    color: #145A32;
+    color: #1F3A2E;
 }
 
 body.dark-mode .account-box p.profile-username,
 body.dark-mode .modal-box p.user-profile-view-username {
-    color: #145A32;
+    color: #1F3A2E;
 }
 
 body.dark-mode .side-menu-header,
@@ -1057,7 +1088,7 @@ body.dark-mode .modal-box .user-profile-view-name {
 }
 
 body.dark-mode .modal-box .user-profile-view-role {
-    color: #145A32;
+    color: #1F3A2E;
 }
 
 body.dark-mode .modal-box .user-profile-view-role.role-seller {
@@ -1065,7 +1096,7 @@ body.dark-mode .modal-box .user-profile-view-role.role-seller {
 }
 
 body.dark-mode .modal-box .user-profile-view-avatar {
-    color: #145A32;
+    color: #1F3A2E;
 }
 
 body.dark-mode .order-row-top strong {
@@ -1170,8 +1201,8 @@ body.dark-mode .auth-tab {
 }
 
 body.dark-mode .auth-tab.active {
-    color: #145A32;
-    border-bottom-color: #145A32;
+    color: #1F3A2E;
+    border-bottom-color: #1F3A2E;
 }
 
 body.dark-mode .auth-box .auth-subtitle {
@@ -1232,21 +1263,8 @@ body.dark-mode .auth-box .auth-skip {
     color: #aaa;
 }
 
-body.dark-mode .logo img,
-body.dark-mode .cart-icon-wrap img {
-    filter: brightness(0) invert(1);
-}
-
 body.dark-mode .logo {
     color: #fff;
-}
-
-body.dark-mode .notif-icon-wrap svg {
-    stroke: #fff;
-}
-
-body.dark-mode .wishlist-icon-wrap svg {
-    stroke: #fff;
 }
 
 body.dark-mode .info-section {
@@ -1257,9 +1275,8 @@ body.dark-mode .info-content strong {
     color: #f0f0f0;
 }
 
-body.dark-mode .page-transition-overlay {
-    background: linear-gradient(135deg, #3a3a3a, #5a5a5a);
-}
+/* .page-transition-overlay deliberately stays green in dark mode too —
+   see base .page-transition-overlay rule below (intentional). */
 
 .page-transition-overlay {
     position: fixed;
@@ -1267,7 +1284,7 @@ body.dark-mode .page-transition-overlay {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #145A32, #66bb6a);
+    background: linear-gradient(135deg, #1F3A2E, #66bb6a);
     z-index: 3000;
     pointer-events: none;
     transform: translate3d(-100%, 0, 0);
@@ -1300,7 +1317,7 @@ body.dark-mode .page-transition-overlay {
     }
 
     nav ul li a:hover {
-        color: #145A32;
+        color: #1F3A2E;
     }
 
     .menu-icon {
@@ -1379,8 +1396,8 @@ body.dark-mode .page-transition-overlay {
 }
 
 .auth-tab.active {
-    color: #145A32;
-    border-bottom-color: #145A32;
+    color: #1F3A2E;
+    border-bottom-color: #1F3A2E;
 }
 
 .auth-subtitle {
@@ -1492,12 +1509,12 @@ body.dark-mode .page-transition-overlay {
 
 .auth-form select:focus {
     outline: none;
-    border-color: #145A32;
+    border-color: #1F3A2E;
 }
 
 .auth-form input:focus {
     outline: none;
-    border-color: #145A32;
+    border-color: #1F3A2E;
 }
 
 .auth-error {
@@ -1510,7 +1527,7 @@ body.dark-mode .page-transition-overlay {
 .auth-link {
     display: inline-block;
     font-size: 12px;
-    color: #145A32;
+    color: #1F3A2E;
     text-decoration: underline;
     margin-top: -4px;
 }
@@ -1574,8 +1591,8 @@ body.dark-mode .page-transition-overlay {
 
 .auth-scan-btn {
     background: #fff;
-    color: #145A32;
-    border: 1px solid #145A32;
+    color: #1F3A2E;
+    border: 1px solid #1F3A2E;
 }
 
 .auth-scan-btn:hover {
@@ -1693,9 +1710,9 @@ body.dark-mode .page-transition-overlay {
 }
 
 .id-scan-orient-btn.active {
-    border-color: #145A32;
+    border-color: #1F3A2E;
     background: #eafaf0;
-    color: #145A32;
+    color: #1F3A2E;
     font-weight: 600;
 }
 
@@ -1733,6 +1750,21 @@ body.dark-mode .id-scan-hint {
     color: #999;
 }
 
+body.dark-mode .product-search-input {
+    background: #1e1e1e;
+    color: #eee;
+    border-color: #66bb6a;
+}
+
+body.dark-mode .product-search-input:focus {
+    border-color: #a5d6a7;
+    box-shadow: 0 0 0 3px rgba(102, 187, 106, 0.2);
+}
+
+body.dark-mode .product-search-icon {
+    color: #66bb6a;
+}
+
 body.dark-mode .auth-scan-btn {
     background: #1c1c1c;
     color: #66bb6a;
@@ -1750,7 +1782,7 @@ body.dark-mode .auth-link-btn {
     margin-top: 6px;
     padding: 8px 10px;
     background: #e8f5e9;
-    border: 1px dashed #145A32;
+    border: 1px dashed #1F3A2E;
     border-radius: 8px;
     color: #c0392b;
     font-size: 12px;
@@ -1767,7 +1799,7 @@ body.dark-mode .auth-link-btn {
     width: 13px;
     height: 13px;
     border: 2px solid #b8e6c1;
-    border-top-color: #145A32;
+    border-top-color: #1F3A2E;
     border-radius: 50%;
     animation: resend-spin 0.7s linear infinite;
 }
@@ -1835,7 +1867,7 @@ body.dark-mode .auth-link-btn {
     width: 90px;
     height: 90px;
     border-radius: 50%;
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff;
     display: flex;
     align-items: center;
@@ -1856,7 +1888,7 @@ body.dark-mode .auth-link-btn {
     right: 0;
     width: 30px;
     height: 30px;
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff;
     border-radius: 50%;
     display: flex;
@@ -1876,8 +1908,8 @@ body.dark-mode .auth-link-btn {
 .profile-role {
     display: inline-block;
     font-size: 12px;
-    color: #145A32;
-    border: 1px solid #145A32;
+    color: #1F3A2E;
+    border: 1px solid #1F3A2E;
     border-radius: 20px;
     padding: 3px 14px;
     margin: -12px auto 20px;
@@ -1989,8 +2021,8 @@ body.dark-mode .verify-badge-no {
 }
 
 .profile-edit-name-btn:hover {
-    border-color: #145A32;
-    color: #145A32;
+    border-color: #1F3A2E;
+    color: #1F3A2E;
 }
 
 .profile-logout-btn {
@@ -1998,8 +2030,8 @@ body.dark-mode .verify-badge-no {
     bottom: 24px;
     right: 24px;
     background: #fff;
-    color: #145A32;
-    border: 1px solid #145A32;
+    color: #1F3A2E;
+    border: 1px solid #1F3A2E;
     padding: 8px 20px;
     border-radius: 30px;
     font-family: inherit;
@@ -2009,7 +2041,7 @@ body.dark-mode .verify-badge-no {
 }
 
 .profile-logout-btn:hover {
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff;
 }
 
@@ -2024,12 +2056,12 @@ body.dark-mode .verify-badge-no {
 
 .btn-outline {
     background: none;
-    color: #145A32;
-    border: 1px solid #145A32;
+    color: #1F3A2E;
+    border: 1px solid #1F3A2E;
 }
 
 .btn-outline:hover {
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff;
 }
 
@@ -2145,7 +2177,7 @@ body.dark-mode .confirm-overlay {
 }
 
 .modal-close:hover {
-    color: #145A32;
+    color: #1F3A2E;
 }
 
 #confirmModalOverlay {
@@ -2179,7 +2211,7 @@ body.dark-mode .confirm-overlay {
 
 .product-detail-price {
     font-size: 20px;
-    color: #145A32;
+    color: #1F3A2E;
     margin-bottom: 6px;
 }
 
@@ -2300,7 +2332,7 @@ body.dark-mode .confirm-overlay {
 }
 
 .star-input span.filled {
-    color: #145A32;
+    color: #1F3A2E;
 }
 
 .review-form input,
@@ -2355,7 +2387,7 @@ body.dark-mode .confirm-overlay {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff;
     font-size: 12px;
     font-weight: bold;
@@ -2392,7 +2424,7 @@ body.dark-mode .confirm-overlay {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff;
     font-size: 12px;
     font-weight: bold;
@@ -2416,7 +2448,7 @@ body.dark-mode .confirm-overlay {
 
 .pd-login-notice {
     font-size: 12px;
-    color: #145A32;
+    color: #1F3A2E;
     margin-top: -20px;
     margin-bottom: 15px;
 }
@@ -2452,7 +2484,7 @@ body.dark-mode .confirm-overlay {
 
 .chat-header-sub {
     font-size: 11px;
-    color: #145A32;
+    color: #1F3A2E;
 }
 
 .chat-messages {
@@ -2481,7 +2513,7 @@ body.dark-mode .confirm-overlay {
 
 .chat-bubble-user {
     align-self: flex-end;
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff;
     border-bottom-right-radius: 4px;
 }
@@ -2496,8 +2528,8 @@ body.dark-mode .confirm-overlay {
 
 .chat-choice-btn {
     background: #fff;
-    border: 1px solid #145A32;
-    color: #145A32;
+    border: 1px solid #1F3A2E;
+    color: #1F3A2E;
     padding: 7px 16px;
     border-radius: 20px;
     font-size: 13px;
@@ -2506,7 +2538,7 @@ body.dark-mode .confirm-overlay {
 }
 
 .chat-choice-btn:hover {
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff;
 }
 
@@ -2533,11 +2565,11 @@ body.dark-mode .confirm-overlay {
 }
 
 .chat-text-input-row input:focus {
-    border-color: #145A32;
+    border-color: #1F3A2E;
 }
 
 .chat-send-btn {
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff;
     border: none;
     padding: 0 18px;
@@ -2548,7 +2580,7 @@ body.dark-mode .confirm-overlay {
 }
 
 .chat-send-btn:hover {
-    background: #0d3d22;
+    background: #172B22;
 }
 
 .chat-send-btn:disabled,
@@ -2561,7 +2593,7 @@ body.dark-mode .confirm-overlay {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff;
     border: none;
     padding: 10px 22px;
@@ -2574,7 +2606,7 @@ body.dark-mode .confirm-overlay {
 }
 
 .contact-support-btn:hover {
-    background: #0d3d22;
+    background: #172B22;
 }
 
 .contact-support-icon {
@@ -2591,7 +2623,7 @@ body.dark-mode .confirm-overlay {
     width: 46px;
     height: 46px;
     border-radius: 10px;
-    background: #145A32;
+    background: #1F3A2E;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2705,8 +2737,8 @@ body.dark-mode .confirm-overlay {
 }
 
 .orders-panel-clear-btn:hover {
-    color: #145A32;
-    border-color: #145A32;
+    color: #1F3A2E;
+    border-color: #1F3A2E;
 }
 
 .orders-panel-manual-toolbar {
@@ -2754,7 +2786,7 @@ body.dark-mode .confirm-overlay {
     width: 17px;
     height: 17px;
     cursor: pointer;
-    accent-color: #145A32;
+    accent-color: #1F3A2E;
 }
 
 .order-row-main {
@@ -2816,7 +2848,7 @@ body.dark-mode .confirm-overlay {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #145A32;
+    color: #1F3A2E;
     transition: transform 0.2s ease;
 }
 
@@ -2873,11 +2905,11 @@ body.dark-mode .confirm-overlay {
 
 .msg-list-row:hover {
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-    border-color: #145A32;
+    border-color: #1F3A2E;
 }
 
 .msg-list-row-unread {
-    border-color: #145A32;
+    border-color: #1F3A2E;
     background: #f4faf6;
 }
 
@@ -2949,12 +2981,12 @@ body.dark-mode .confirm-overlay {
 }
 
 .order-tracking-tab:hover {
-    color: #145A32;
+    color: #1F3A2E;
 }
 
 .order-tracking-tab.active {
-    color: #145A32;
-    border-bottom-color: #145A32;
+    color: #1F3A2E;
+    border-bottom-color: #1F3A2E;
 }
 
 .order-tracking-list {
@@ -3056,12 +3088,12 @@ body.dark-mode .confirm-overlay {
 }
 
 .review-write-btn {
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff;
 }
 
 .review-write-btn:hover {
-    background: #0d3d22;
+    background: #172B22;
 }
 
 .quick-review-row {
@@ -3188,8 +3220,8 @@ body.dark-mode .confirm-overlay {
 }
 
 .write-review-tag.selected {
-    border-color: #145A32;
-    color: #145A32;
+    border-color: #1F3A2E;
+    color: #1F3A2E;
     background: #e8f5e9;
 }
 
@@ -3251,7 +3283,7 @@ body.dark-mode .confirm-overlay {
 
 .write-review-submit-btn {
     width: 100%;
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff;
     border: none;
     font-family: inherit;
@@ -3447,7 +3479,7 @@ body.dark-mode .confirm-overlay {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff;
     font-weight: bold;
 }
@@ -3561,7 +3593,7 @@ body.dark-mode .confirm-overlay {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff;
     font-weight: bold;
 }
@@ -3570,7 +3602,7 @@ body.dark-mode .confirm-overlay {
     position: absolute;
     top: -4px;
     right: -4px;
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff;
     font-size: 10px;
     min-width: 16px;
@@ -3638,7 +3670,7 @@ body.dark-mode .confirm-overlay {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff;
     font-size: 13px;
     font-weight: bold;
@@ -3658,7 +3690,7 @@ body.dark-mode .confirm-overlay {
 }
 
 .chat-with-status.is-typing {
-    color: #145A32;
+    color: #1F3A2E;
     font-style: italic;
 }
 
@@ -3671,7 +3703,7 @@ body.dark-mode .confirm-overlay {
 }
 
 .review-item-stars {
-    color: #145A32;
+    color: #1F3A2E;
     font-size: 13px;
 }
 
@@ -3724,8 +3756,8 @@ body.dark-mode .confirm-overlay {
 }
 
 .review-form-photo-label:hover {
-    border-color: #145A32;
-    color: #145A32;
+    border-color: #1F3A2E;
+    color: #1F3A2E;
 }
 
 .review-form-photo-preview-wrap {
@@ -3772,12 +3804,18 @@ body.dark-mode .confirm-overlay {
     cursor: pointer;
 }
 
+.cart-icon-wrap img {
+    filter: brightness(0) invert(1);
+}
+
 .cart-badge {
     position: absolute;
     top: -8px;
     right: -8px;
-    background: #145A32;
-    color: #fff;
+    background: #FFC72C;
+    color: #1F3A2E;
+    font-weight: 700;
+    border: 2px solid #fff;
     font-size: 10px;
     min-width: 16px;
     height: 16px;
@@ -3802,6 +3840,7 @@ body.dark-mode .confirm-overlay {
 
 .notif-icon-wrap svg {
     display: block;
+    stroke: #fff;
 }
 
 .wishlist-icon-wrap {
@@ -3818,6 +3857,7 @@ body.dark-mode .confirm-overlay {
 
 .wishlist-icon-wrap svg {
     display: block;
+    stroke: #fff;
 }
 
 .product-wishlist-btn {
@@ -3850,8 +3890,8 @@ body.dark-mode .confirm-overlay {
 }
 
 .product-wishlist-btn.active svg {
-    fill: #145A32;
-    stroke: #145A32;
+    fill: #1F3A2E;
+    stroke: #1F3A2E;
 }
 
 @keyframes heartPop {
@@ -3878,7 +3918,7 @@ body.dark-mode .confirm-overlay {
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    background: rgba(20, 90, 50, 0.45);
+    background: rgba(31, 58, 46, 0.45);
     animation: heartBurst 0.45s ease-out;
     pointer-events: none;
 }
@@ -3910,12 +3950,12 @@ body.dark-mode .confirm-overlay {
 }
 
 .pd-wishlist-btn:hover {
-    border-color: #145A32;
+    border-color: #1F3A2E;
 }
 
 .pd-wishlist-btn.active svg {
-    fill: #145A32;
-    stroke: #145A32;
+    fill: #1F3A2E;
+    stroke: #1F3A2E;
 }
 
 .wishlist-empty {
@@ -3953,7 +3993,7 @@ body.dark-mode .confirm-overlay {
 
 .wishlist-item-price {
     font-size: 13px;
-    color: #145A32;
+    color: #1F3A2E;
     margin-top: 4px;
 }
 
@@ -3972,7 +4012,7 @@ body.dark-mode .confirm-overlay {
 }
 
 .wishlist-add-cart-btn {
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff !important;
 }
 
@@ -4027,7 +4067,7 @@ body.dark-mode .wishlist-item {
 
 .cart-item-price {
     font-size: 12px;
-    color: #145A32;
+    color: #1F3A2E;
 }
 
 .cart-item-controls {
@@ -4099,13 +4139,13 @@ body.dark-mode .wishlist-item {
 
 .promo-code-row input:focus {
     outline: none;
-    border-color: #145A32;
+    border-color: #1F3A2E;
 }
 
 .promo-apply-btn {
     background: #fff;
-    border: 1px solid #145A32;
-    color: #145A32;
+    border: 1px solid #1F3A2E;
+    color: #1F3A2E;
     padding: 0 16px;
     border-radius: 8px;
     font-family: inherit;
@@ -4116,7 +4156,7 @@ body.dark-mode .wishlist-item {
 }
 
 .promo-apply-btn:hover {
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff;
 }
 
@@ -4203,7 +4243,7 @@ body.dark-mode .wishlist-item {
 }
 
 .payment-method-btn:hover {
-    border-color: #145A32;
+    border-color: #1F3A2E;
     background: #e8f5e9;
 }
 
@@ -4230,7 +4270,7 @@ body.dark-mode .wishlist-item {
 }
 
 .gcash-amount-box h2 {
-    color: #145A32;
+    color: #1F3A2E;
     font-weight: normal;
 }
 
@@ -4255,7 +4295,7 @@ body.dark-mode .wishlist-item {
 
 .gcash-note {
     font-size: 12px;
-    color: #145A32;
+    color: #1F3A2E;
     font-weight: bold;
     text-align: center;
     margin-bottom: 14px;
@@ -4333,7 +4373,7 @@ body.dark-mode .wishlist-item {
     height: 46px;
     margin: 0 auto 18px;
     border: 4px solid #cdeed4;
-    border-top-color: #145A32;
+    border-top-color: #1F3A2E;
     border-radius: 50%;
     animation: payment-spin 0.8s linear infinite;
 }
@@ -4408,30 +4448,31 @@ body.dark-mode .wishlist-item {
 
 .auth-form textarea:focus {
     outline: none;
-    border-color: #145A32;
+    border-color: #1F3A2E;
 }
 
 .product-search-wrap {
     position: relative;
     max-width: 420px;
-    margin: 0 auto 30px;
+    margin: 15px auto 30px;
 }
 
 .product-search-input {
     width: 100%;
     padding: 12px 18px 12px 42px;
-    border: 1px solid #ddd;
+    border: 2px solid #1F3A2E;
     border-radius: 30px;
     font-family: inherit;
     font-size: 14px;
     color: #555;
     background: #fff;
-    transition: border-color 0.3s ease;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .product-search-input:focus {
     outline: none;
-    border-color: #145A32;
+    border-color: #172B22;
+    box-shadow: 0 0 0 3px rgba(31, 58, 46, 0.15);
 }
 
 .product-search-icon {
@@ -4440,7 +4481,7 @@ body.dark-mode .wishlist-item {
     top: 50%;
     transform: translateY(-50%);
     font-size: 15px;
-    color: #999;
+    color: #1F3A2E;
     pointer-events: none;
 }
 
@@ -4469,7 +4510,7 @@ body.dark-mode .wishlist-item {
     right: 0;
     top: 50%;
     transform: translateY(-50%);
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff;
     border: none;
     padding: 8px 22px;
@@ -4482,7 +4523,7 @@ body.dark-mode .wishlist-item {
 }
 
 .add-product-btn:hover {
-    background: #0d3d22;
+    background: #172B22;
 }
 
 .new-product-filter {
@@ -4505,7 +4546,7 @@ body.dark-mode .wishlist-item {
 .new-product-filter input[type="checkbox"] {
     width: 17px;
     height: 17px;
-    accent-color: #145A32;
+    accent-color: #1F3A2E;
     cursor: pointer;
 }
 
@@ -4582,13 +4623,13 @@ body.dark-mode .wishlist-item {
 }
 
 .pagination button:hover:not(:disabled):not(.pagination-active) {
-    border-color: #145A32;
-    color: #145A32;
+    border-color: #1F3A2E;
+    color: #1F3A2E;
 }
 
 .pagination button.pagination-active {
-    background: #145A32;
-    border-color: #145A32;
+    background: #1F3A2E;
+    border-color: #1F3A2E;
     color: #fff;
 }
 
@@ -4669,7 +4710,7 @@ body.dark-mode .wishlist-item {
 }
 
 .product-edit-btn:hover {
-    background: #145A32;
+    background: #1F3A2E;
 }
 
 .product-image-wrap {
@@ -4759,8 +4800,8 @@ body.dark-mode .wishlist-item {
 
 .promo-percent-presets button:hover,
 .promo-percent-presets button.selected {
-    border-color: #145A32;
-    background: #145A32;
+    border-color: #1F3A2E;
+    background: #1F3A2E;
     color: #fff;
 }
 
@@ -4848,7 +4889,7 @@ body.dark-mode .wishlist-item {
 
 .review-item-user-clickable:hover .review-item-name,
 .buyer-name-link:hover {
-    color: #145A32;
+    color: #1F3A2E;
     text-decoration: underline;
 }
 
@@ -4872,7 +4913,7 @@ body.dark-mode .wishlist-item {
     align-items: center;
     justify-content: center;
     background: #d4f0da;
-    color: #145A32;
+    color: #1F3A2E;
     font-size: 26px;
     font-weight: bold;
 }
@@ -4895,7 +4936,7 @@ body.dark-mode .wishlist-item {
 
 .user-profile-view-username {
     margin: -4px 0 10px;
-    color: #145A32;
+    color: #1F3A2E;
     font-weight: 600;
     font-size: 14px;
 }
@@ -4903,7 +4944,7 @@ body.dark-mode .wishlist-item {
 .user-profile-view-role {
     display: inline-block;
     background: #d4f0da;
-    color: #145A32;
+    color: #1F3A2E;
     font-size: 13px;
     font-weight: bold;
     padding: 4px 16px;
@@ -4936,7 +4977,7 @@ body.dark-mode .wishlist-item {
     font-size: 14px;
     padding: 8px 22px;
     border-radius: 20px;
-    background: #145A32;
+    background: #1F3A2E;
     color: #fff;
 }
 
@@ -5058,7 +5099,7 @@ body.dark-mode .wishlist-item {
 }
 
 .price-discounted {
-    color: #145A32;
+    color: #1F3A2E;
 }
 
 .product-detail-discount-expiry {
@@ -5477,11 +5518,11 @@ body.dark-mode .wishlist-item {
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <rect x="3" y="7" width="18" height="13" rx="3" fill="#fff"/>
                     <rect x="9" y="2" width="6" height="5" rx="1.5" fill="#fff"/>
-                    <circle cx="12" cy="4.3" r="0.9" fill="#145A32"/>
+                    <circle cx="12" cy="4.3" r="0.9" fill="#1F3A2E"/>
                     <line x1="12" y1="5.2" x2="12" y2="7" stroke="#fff" stroke-width="1.2"/>
-                    <circle cx="8.3" cy="13.5" r="1.6" fill="#145A32"/>
-                    <circle cx="15.7" cy="13.5" r="1.6" fill="#145A32"/>
-                    <rect x="7.5" y="17" width="9" height="1.8" rx="0.9" fill="#145A32"/>
+                    <circle cx="8.3" cy="13.5" r="1.6" fill="#1F3A2E"/>
+                    <circle cx="15.7" cy="13.5" r="1.6" fill="#1F3A2E"/>
+                    <rect x="7.5" y="17" width="9" height="1.8" rx="0.9" fill="#1F3A2E"/>
                     <rect x="0.5" y="11" width="2.2" height="4" rx="1.1" fill="#fff"/>
                     <rect x="21.3" y="11" width="2.2" height="4" rx="1.1" fill="#fff"/>
                 </svg>
@@ -6351,15 +6392,15 @@ body.dark-mode .wishlist-item {
 
             <button type="button" class="contact-support-btn" onclick="openSupportChat()">
                 <svg class="contact-support-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="3" y="7" width="18" height="13" rx="3" fill="#145A32"/>
-                    <rect x="9" y="2" width="6" height="5" rx="1.5" fill="#145A32"/>
+                    <rect x="3" y="7" width="18" height="13" rx="3" fill="#1F3A2E"/>
+                    <rect x="9" y="2" width="6" height="5" rx="1.5" fill="#1F3A2E"/>
                     <circle cx="12" cy="4.3" r="0.9" fill="#fff"/>
-                    <line x1="12" y1="5.2" x2="12" y2="7" stroke="#145A32" stroke-width="1.2"/>
+                    <line x1="12" y1="5.2" x2="12" y2="7" stroke="#1F3A2E" stroke-width="1.2"/>
                     <circle cx="8.3" cy="13.5" r="1.6" fill="#fff"/>
                     <circle cx="15.7" cy="13.5" r="1.6" fill="#fff"/>
                     <rect x="7.5" y="17" width="9" height="1.8" rx="0.9" fill="#fff"/>
-                    <rect x="0.5" y="11" width="2.2" height="4" rx="1.1" fill="#145A32"/>
-                    <rect x="21.3" y="11" width="2.2" height="4" rx="1.1" fill="#145A32"/>
+                    <rect x="0.5" y="11" width="2.2" height="4" rx="1.1" fill="#1F3A2E"/>
+                    <rect x="21.3" y="11" width="2.2" height="4" rx="1.1" fill="#1F3A2E"/>
                 </svg>
                 Contact Support
             </button>
@@ -8228,12 +8269,32 @@ body.dark-mode .wishlist-item {
                 ? ('<img src="' + u.avatar + '" alt="">')
                 : ('<span>' + initials + '</span>');
 
+            var panelRole = getPanelRole(u.email);
+            var tagsHtml = "";
+
+            if (u.isOwner) {
+                tagsHtml += ' <span class="user-search-tag tag-owner">Owner</span>';
+            } else if (panelRole === "admin") {
+                tagsHtml += ' <span class="user-search-tag tag-admin">Admin</span>';
+            } else if (panelRole === "seller" || u.isSeller) {
+                tagsHtml += ' <span class="user-search-tag tag-seller">Seller</span>';
+            }
+
+            if (!u.isOwner && u.role) {
+                tagsHtml += ' <span class="user-search-tag tag-role">' + escapeHtml(u.role) + '</span>';
+            }
+
+            if (!u.isOwner && u.role) {
+                tagsHtml += u.idVerified
+                    ? ' <span class="user-search-tag tag-verified">Verified</span>'
+                    : ' <span class="user-search-tag tag-unverified">Not Verified</span>';
+            }
+
             return (
                 '<div class="user-search-result" onclick="openUserProfileView(\'' + escapeHtml(u.email || "") + '\', \'' + escapeHtml(u.name || "") + '\')">' +
                     '<div class="user-search-avatar">' + avatarHtml + '</div>' +
                     '<div class="user-search-info">' +
-                        '<div class="user-search-name">' + escapeHtml(u.name || "Unknown") +
-                            (u.isOwner ? ' <span class="user-search-tag">Owner</span>' : (u.isSeller ? ' <span class="user-search-tag">Seller</span>' : '')) +
+                        '<div class="user-search-name">' + escapeHtml(u.name || "Unknown") + tagsHtml +
                         '</div>' +
                         (u.username ? '<div class="user-search-username">' + escapeHtml(u.username) + '</div>' : '') +
                     '</div>' +
