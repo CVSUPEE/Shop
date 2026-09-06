@@ -89,7 +89,9 @@ ul {
 
 .logo {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
     flex-shrink: 0;
 }
 
@@ -101,9 +103,25 @@ ul {
     display: block;
 }
 
+.logo-tagline {
+    font-size: 11px;
+    font-weight: 700;
+    color: #FFC72C;
+    margin-top: 2px;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+}
+
 @media only screen and (max-width: 800px) {
     .logo img {
         height: 52px;
+    }
+
+    .logo-tagline {
+        font-size: 9px;
+        white-space: normal;
+        max-width: 160px;
+        line-height: 1.2;
     }
 }
 
@@ -1874,6 +1892,41 @@ body.dark-mode .auth-link-btn {
     border-radius: 20px;
     padding: 3px 12px;
     margin: -14px auto 20px;
+}
+
+.panel-role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 20px;
+    padding: 3px 12px;
+    margin: -14px auto 10px;
+}
+
+.panel-role-badge-seller {
+    color: #1565c0;
+    background: #e3f2fd;
+    border: 1px solid #1565c0;
+}
+
+.panel-role-badge-admin {
+    color: #5e35b1;
+    background: #ede7f6;
+    border: 1px solid #5e35b1;
+}
+
+body.dark-mode .panel-role-badge-seller {
+    color: #90caf9;
+    background: #10233a;
+    border-color: #64b5f6;
+}
+
+body.dark-mode .panel-role-badge-admin {
+    color: #d1c4e9;
+    background: #241a35;
+    border-color: #9575cd;
 }
 
 .verify-badge-yes {
@@ -5881,6 +5934,7 @@ body.dark-mode .wishlist-item {
 
             <div class="logo">
                 <img src="images/logo.png" alt="CVSPEE">
+                <span class="logo-tagline">Cavite State University - Campus Shop</span>
             </div>
 
             <nav>
@@ -5940,7 +5994,7 @@ body.dark-mode .wishlist-item {
         <li><a href="#">TEMPLATE 5</a></li>
         <li><a href="#">TEMPLATE 6</a></li>
         <li><a href="#">TEMPLATE 7</a></li>
-        <li id="orderManagementMenuItem" style="display:none;"><a href="https://cvsupee.github.io/Panel/" target="_blank" rel="noopener">Admib/Seller PANEL</a></li>
+        <li id="orderManagementMenuItem" style="display:none;"><a href="https://cvsupee.github.io/Panel/" target="_blank" rel="noopener">Admin/Seller Panel</a></li>
         <li id="promoManagerMenuItem" style="display:none;"><a href="#" onclick="closeSideMenu(); openPromoManager(); return false;">Promo Codes</a></li>
     </ul>
 
@@ -6817,7 +6871,8 @@ body.dark-mode .wishlist-item {
         promocodes: [],
         dms: {},
         bannedAccounts: [],
-        ready: { users: false, orders: false, reviews: false, comments: false, products: false, promocodes: false, dms: false, bannedAccounts: false }
+        panelRoles: {},
+        ready: { users: false, orders: false, reviews: false, comments: false, products: false, promocodes: false, dms: false, bannedAccounts: false, panelRoles: false }
     };
     var _ownerSeeded = false;
 
@@ -6834,6 +6889,10 @@ body.dark-mode .wishlist-item {
         }
         if (kind === "users" && typeof renderAccount === "function") {
             renderAccount();
+        }
+        if (kind === "panelRoles") {
+            if (typeof renderAccount === "function") renderAccount();
+            if (typeof updateAddProductButtonVisibility === "function") updateAddProductButtonVisibility();
         }
         if (kind === "products") {
             applyCloudProducts();
@@ -6870,6 +6929,28 @@ body.dark-mode .wishlist-item {
         var list = _cloud.bannedAccounts || [];
         for (var i = 0; i < list.length; i++) {
             if ((list[i].email || "").toLowerCase() === email) return list[i];
+        }
+        return null;
+    }
+
+    // Read-only view of the panel's seller/admin role assignments
+    // (athletica/orderManageAccounts, managed by the admin panel's
+    // referral system). We only READ this from the site — promotions
+    // themselves happen in the panel, never here.
+    db.collection("athletica").doc("orderManageAccounts").onSnapshot(function (doc) {
+        _cloud.panelRoles = (doc.exists && doc.data().map) ? doc.data().map : {};
+        _cloud.ready.panelRoles = true;
+        _onCloudChange("panelRoles");
+    }, function (err) { console.error("panelRoles sync error", err); });
+
+    function getPanelRole(email) {
+        email = (email || "").trim().toLowerCase();
+        if (!email) return null;
+        var map = _cloud.panelRoles || {};
+        for (var key in map) {
+            if (Object.prototype.hasOwnProperty.call(map, key) && key.toLowerCase() === email) {
+                return map[key].role || null;
+            }
         }
         return null;
     }
@@ -8097,6 +8178,16 @@ body.dark-mode .wishlist-item {
                 (user.username ? '<p class="profile-username">' + escapeHtml(user.username) + '</p>' : '') +
                 '<p class="profile-email">' + user.email + '</p>' +
                 (user.role ? '<p class="profile-role">' + escapeHtml(user.role) + '</p>' : '') +
+                (function () {
+                    var panelRole = getPanelRole(user.email);
+                    if (panelRole === "admin") {
+                        return '<p class="panel-role-badge panel-role-badge-admin"><i class="fa-solid fa-shield-halved"></i> Admin</p>';
+                    }
+                    if (panelRole === "seller") {
+                        return '<p class="panel-role-badge panel-role-badge-seller"><i class="fa-solid fa-store"></i> Seller</p>';
+                    }
+                    return '';
+                })() +
                 (user.role ? (user.idVerified
                     ? '<p class="verify-badge verify-badge-yes" title="ID verified at sign up"><i class="fa-solid fa-circle-check"></i> Verified</p>'
                     : '<p class="verify-badge verify-badge-no" title="ID not verified"><i class="fa-solid fa-circle-xmark"></i> Not Verified</p>') : '') +
@@ -8457,6 +8548,12 @@ body.dark-mode .wishlist-item {
         return !!(user && !user.isOwner && user.isSeller);
     }
 
+    function getMyPanelRole() {
+        var user = getCurrentUser();
+        if (!user) return null;
+        return getPanelRole(user.email);
+    }
+
     
     
     
@@ -8482,7 +8579,10 @@ body.dark-mode .wishlist-item {
         if (promoItem) promoItem.style.display = isOwnerLoggedIn() ? "block" : "none";
 
         var orderMgmtItem = document.getElementById("orderManagementMenuItem");
-        if (orderMgmtItem) orderMgmtItem.style.display = isOwnerLoggedIn() ? "block" : "none";
+        if (orderMgmtItem) {
+            var myPanelRole = getMyPanelRole();
+            orderMgmtItem.style.display = (isOwnerLoggedIn() || myPanelRole === "seller" || myPanelRole === "admin") ? "block" : "none";
+        }
 
         renderProductGrid();
     }
