@@ -7786,6 +7786,7 @@ body.dark-mode .wishlist-item {
         appealsDocRef.get().then(function (doc) {
             var list = (doc.exists && doc.data().list) ? doc.data().list : [];
             list.push({
+                id: Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8),
                 email: _banAppealEmail,
                 name: _banAppealName,
                 message: msg,
