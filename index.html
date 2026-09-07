@@ -212,6 +212,83 @@ nav ul li a:hover {
     background: #172B22;
 }
 
+.btn-neutral-outline {
+    display: inline-block;
+    background: #fff;
+    color: #555;
+    border: 1px solid #ddd;
+    padding: 8px 26px;
+    margin: 30px 5px;
+    border-radius: 30px;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.btn-neutral-outline:hover {
+    background: #f5f5f5;
+}
+
+.ban-appeal-box {
+    text-align: center;
+}
+
+.ban-appeal-title {
+    color: #c62828;
+    margin-bottom: 10px;
+}
+
+.ban-appeal-message {
+    color: #555;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.ban-appeal-note {
+    color: #777;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 14px;
+}
+
+.ban-appeal-textarea {
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.ban-appeal-textarea:focus {
+    outline: none;
+    border-color: #1F3A2E;
+}
+
+.ban-appeal-error {
+    color: #c62828;
+    font-size: 12px;
+    min-height: 16px;
+    margin: 8px 0 0;
+}
+
+.ban-appeal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+}
+
+.ban-appeal-actions .btn,
+.ban-appeal-actions .btn-neutral-outline {
+    margin: 20px 5px 5px;
+    flex: 1;
+    text-align: center;
+    max-width: 160px;
+}
+
 .header {
     background: radial-gradient(#fff, #d4f0da);
 }
@@ -1007,6 +1084,22 @@ body.dark-mode .modal-box div {
     color: #ddd;
 }
 
+body.dark-mode .ban-appeal-textarea {
+    background: #262626;
+    border-color: #444;
+    color: #eee;
+}
+
+body.dark-mode .btn-neutral-outline {
+    background: #262626;
+    border-color: #444;
+    color: #ccc;
+}
+
+body.dark-mode .btn-neutral-outline:hover {
+    background: #2f2f2f;
+}
+
 body.dark-mode .chat-bubble-ai {
     background: #2a2a2a;
     color: #eee;
@@ -1559,6 +1652,13 @@ body.dark-mode .info-content strong {
 .auth-id-upload-note {
     font-size: 11px;
     color: #777;
+    margin: -6px 0 0;
+    line-height: 1.5;
+}
+
+.auth-email-note {
+    font-size: 11px;
+    color: #8d6e00;
     margin: -6px 0 0;
     line-height: 1.5;
 }
@@ -5177,6 +5277,7 @@ body.dark-mode .wishlist-item {
             <input type="text" id="signupName" placeholder="Full Name" required>
             <input type="text" id="signupUsername" placeholder="Username (e.g. @CVSPEE2026)" required>
             <input type="email" id="signupEmail" placeholder="Email" required>
+            <p class="auth-email-note" id="signupEmailNote" style="display:none;">Students and teachers must use an official @cvsu.edu.ph email address.</p>
             <input type="password" id="signupPassword" placeholder="Password (min 6 characters)" required>
             <select id="signupRole" required onchange="toggleSignupStudentId()">
                 <option value="" disabled selected>I am a...</option>
@@ -5542,6 +5643,40 @@ body.dark-mode .wishlist-item {
 
     </div>
 
+</div>
+
+<div class="modal-overlay" id="banAppealOverlay">
+    <div class="modal-box ban-appeal-box">
+        <button type="button" class="modal-close" onclick="closeBanAppealModal()">&times;</button>
+
+        <div id="banAppealMessageView">
+            <h3 class="ban-appeal-title">Account Suspended</h3>
+            <p class="ban-appeal-message" id="banAppealMessageText"></p>
+            <div class="ban-appeal-actions">
+                <button type="button" class="btn-neutral-outline" onclick="closeBanAppealModal()">Cancel</button>
+                <button type="button" class="btn" onclick="showBanAppealForm()">Appeal</button>
+            </div>
+        </div>
+
+        <div id="banAppealFormView" style="display:none;">
+            <h3 class="ban-appeal-title">Submit an Appeal</h3>
+            <p class="ban-appeal-note">Explain why you believe this suspension was a mistake. Our team will review your account and get back to you.</p>
+            <textarea id="banAppealMessageInput" class="ban-appeal-textarea" rows="4" placeholder="e.g. This is my real, valid Student ID — I believe it was rejected by mistake because..."></textarea>
+            <p class="ban-appeal-error" id="banAppealFormError"></p>
+            <div class="ban-appeal-actions">
+                <button type="button" class="btn-neutral-outline" onclick="closeBanAppealModal()">Cancel</button>
+                <button type="button" class="btn" id="banAppealSubmitBtn" onclick="submitBanAppeal()">Submit Appeal</button>
+            </div>
+        </div>
+
+        <div id="banAppealSuccessView" style="display:none;">
+            <h3 class="ban-appeal-title">Appeal Submitted</h3>
+            <p class="ban-appeal-message">We've received your appeal and will review your account as soon as possible.</p>
+            <div class="ban-appeal-actions">
+                <button type="button" class="btn" onclick="closeBanAppealModal()">Close</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="modal-overlay" id="ordersPanelOverlay">
@@ -7140,6 +7275,12 @@ body.dark-mode .wishlist-item {
         return /^@[A-Za-z0-9_]{3,20}$/.test(username);
     }
 
+    function isCvsuEmail(email) {
+        // Matches "...@cvsu.edu.ph" as well as campus subdomains like
+        // "...@imus.cvsu.edu.ph" — anything ending in cvsu.edu.ph.
+        return /@([a-z0-9-]+\.)*cvsu\.edu\.ph$/i.test((email || "").trim());
+    }
+
     function isUsernameTaken(username, excludeEmail) {
         var users = getUsers();
         var lower = username.toLowerCase();
@@ -7263,6 +7404,9 @@ body.dark-mode .wishlist-item {
         var field = document.getElementById("signupStudentId");
         field.style.display = (role === "Student") ? "block" : "none";
         if (role !== "Student") field.value = "";
+
+        var emailNote = document.getElementById("signupEmailNote");
+        if (emailNote) emailNote.style.display = (role === "Student" || role === "Teacher") ? "block" : "none";
 
         var idLabel = ROLE_ID_LABELS[role];
         var uploadLabel = document.getElementById("signupIdUploadLabel");
@@ -7588,6 +7732,80 @@ body.dark-mode .wishlist-item {
             (reason ? " Reason: " + reason : "");
     }
 
+    var _banAppealEmail = "";
+    var _banAppealName = "";
+    var _pendingAccountAppeal = null; // { record, email, name } — set by renderAccount's banned view
+
+    function openBanAppealFromAccountPage() {
+        if (!_pendingAccountAppeal) return;
+        openBanAppealModal(_pendingAccountAppeal.record, _pendingAccountAppeal.email, _pendingAccountAppeal.name);
+    }
+
+    function openBanAppealModal(record, email, name) {
+        _banAppealEmail = (email || "").trim().toLowerCase();
+        _banAppealName = name || "";
+
+        document.getElementById("banAppealMessageText").textContent = suspensionMessage(record);
+        document.getElementById("banAppealMessageView").style.display = "block";
+        document.getElementById("banAppealFormView").style.display = "none";
+        document.getElementById("banAppealSuccessView").style.display = "none";
+        document.getElementById("banAppealMessageInput").value = "";
+        document.getElementById("banAppealFormError").textContent = "";
+        document.getElementById("banAppealOverlay").classList.add("show");
+    }
+
+    function closeBanAppealModal() {
+        document.getElementById("banAppealOverlay").classList.remove("show");
+    }
+
+    function showBanAppealForm() {
+        document.getElementById("banAppealMessageView").style.display = "none";
+        document.getElementById("banAppealFormView").style.display = "block";
+        document.getElementById("banAppealMessageInput").focus();
+    }
+
+    function submitBanAppeal() {
+        var msg = document.getElementById("banAppealMessageInput").value.trim();
+        var errorEl = document.getElementById("banAppealFormError");
+        var submitBtn = document.getElementById("banAppealSubmitBtn");
+
+        if (!msg) {
+            errorEl.textContent = "Please explain why you're appealing this suspension.";
+            return;
+        }
+        if (!_banAppealEmail) {
+            errorEl.textContent = "Something went wrong — please close this and try again.";
+            return;
+        }
+
+        errorEl.textContent = "";
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting...";
+
+        var appealsDocRef = db.collection("athletica").doc("accountAppeals");
+        appealsDocRef.get().then(function (doc) {
+            var list = (doc.exists && doc.data().list) ? doc.data().list : [];
+            list.push({
+                email: _banAppealEmail,
+                name: _banAppealName,
+                message: msg,
+                submittedAt: new Date().toISOString(),
+                status: "pending"
+            });
+            return appealsDocRef.set({ list: list });
+        }).then(function () {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Submit Appeal";
+            document.getElementById("banAppealFormView").style.display = "none";
+            document.getElementById("banAppealSuccessView").style.display = "block";
+        }).catch(function (err) {
+            console.error("appeal submit error", err);
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Submit Appeal";
+            errorEl.textContent = "Couldn't submit your appeal right now. Please try again.";
+        });
+    }
+
     function downscaleDataUrl(dataUrl, maxWidth, quality) {
         return new Promise(function (resolve) {
             var img = new Image();
@@ -7620,7 +7838,8 @@ body.dark-mode .wishlist-item {
 
         var bannedRecord = getBannedRecord(email);
         if (bannedRecord) {
-            errorEl.textContent = suspensionMessage(bannedRecord);
+            errorEl.textContent = "";
+            openBanAppealModal(bannedRecord, email, bannedRecord.name || name);
             return false;
         }
 
@@ -7641,6 +7860,11 @@ body.dark-mode .wishlist-item {
 
         if (!role) {
             errorEl.textContent = "Please select whether you are a Teacher, Student, or Parent.";
+            return false;
+        }
+
+        if ((role === "Student" || role === "Teacher") && !isCvsuEmail(email)) {
+            errorEl.textContent = "Students and teachers must sign up using an official @cvsu.edu.ph email address.";
             return false;
         }
 
@@ -7965,7 +8189,8 @@ body.dark-mode .wishlist-item {
 
         var bannedRecord = getBannedRecord(input);
         if (bannedRecord) {
-            errorEl.textContent = suspensionMessage(bannedRecord);
+            errorEl.textContent = "";
+            openBanAppealModal(bannedRecord, input, bannedRecord.name || "");
             return false;
         }
 
@@ -8167,11 +8392,12 @@ body.dark-mode .wishlist-item {
             updateWishlistBadge();
 
             if (wasBanned) {
+                _pendingAccountAppeal = { record: wasBanned, email: storedEmail, name: wasBanned.name || "" };
                 container.innerHTML =
                     '<div class="account-box">' +
                         '<h3>Account Suspended</h3>' +
                         '<p>' + escapeHtml(suspensionMessage(wasBanned)) + '</p>' +
-                        '<a href="#" class="btn" onclick="openAuthModal(); return false;">Sign In / Sign Up</a>' +
+                        '<button type="button" class="btn" onclick="openBanAppealFromAccountPage()">Appeal This Suspension</button>' +
                     '</div>';
                 refreshOrderUI();
                 return;
