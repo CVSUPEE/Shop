@@ -113,15 +113,48 @@ ul {
 }
 
 @media only screen and (max-width: 800px) {
+    .navbar {
+        padding: 14px 12px;
+        flex-wrap: nowrap;
+    }
+
+    .logo {
+        min-width: 0;
+        flex-shrink: 1;
+    }
+
     .logo img {
-        height: 52px;
+        height: 44px;
     }
 
     .logo-tagline {
-        font-size: 9px;
+        font-size: 8px;
         white-space: normal;
-        max-width: 160px;
+        max-width: 110px;
         line-height: 1.2;
+    }
+
+    .hamburger-btn {
+        margin-right: 10px;
+    }
+
+    .notif-icon-wrap,
+    .wishlist-icon-wrap {
+        margin-right: 10px;
+    }
+
+    .menu-icon {
+        margin-left: 10px;
+        width: 24px;
+    }
+
+    .notif-icon-wrap,
+    .wishlist-icon-wrap,
+    .cart-icon-wrap,
+    .menu-icon {
+        align-self: flex-start;
+        margin-top: 8px;
+        flex-shrink: 0;
     }
 }
 
@@ -326,7 +359,7 @@ nav ul li a:hover {
 
 @media only screen and (max-width: 800px) {
     #pagesWrapper {
-        padding-top: 111px;
+        padding-top: 100px;
     }
 }
 
@@ -710,6 +743,7 @@ body.dark-mode .user-search-username {
     width: 28px;
     margin-left: 20px;
     display: none;
+    filter: brightness(0) invert(1);
 }
 
 .hamburger-btn {
@@ -6810,7 +6844,7 @@ body.dark-mode .wishlist-item {
             <div class="footer-col-2">
 
                 <img
-                    src="images/logo-white.png"
+                    src="images/logo-white.PNG"
                     width="125px"
                 >
 
@@ -6859,8 +6893,12 @@ body.dark-mode .wishlist-item {
 
                     <li>Aiona Granada</li>
                     <li>Austine Occidental</li>
+                    <li>Christian Josh Coele</li>
                     <li>Jhalo Pantaleon</li>
                     <li>Arjhay Diaz</li>
+                    <li>Justine Villamor</li>
+                    <li>Kristoff Corillo</li>
+                    <li>Marc Laurence Villa</li>
                     <li>Youri Acosta</li>
 
                 </ul>
