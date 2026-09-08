@@ -7070,6 +7070,7 @@ body.dark-mode .wishlist-item {
         reviews: {},
         comments: {},
         products: {},
+        deletedDefaults: [],
         promocodes: [],
         dms: {},
         bannedAccounts: [],
@@ -7159,6 +7160,7 @@ body.dark-mode .wishlist-item {
 
     db.collection("cvspee").doc("products").onSnapshot(function (doc) {
         _cloud.products = (doc.exists && doc.data().map) ? doc.data().map : {};
+        _cloud.deletedDefaults = (doc.exists && Array.isArray(doc.data().deletedDefaults)) ? doc.data().deletedDefaults : [];
         _cloud.ready.products = true;
         seedDefaultProductsIfNeeded();
         _onCloudChange("products");
@@ -8653,7 +8655,7 @@ body.dark-mode .wishlist-item {
 
         var changed = false;
         Object.keys(DEFAULT_PRODUCTS).forEach(function (id) {
-            if (!merged[id]) {
+            if (!merged[id] && (_cloud.deletedDefaults || []).indexOf(id) === -1) {
                 merged[id] = DEFAULT_PRODUCTS[id];
                 changed = true;
             }
@@ -8661,7 +8663,7 @@ body.dark-mode .wishlist-item {
 
         if (changed) {
             _cloud.products = merged;
-            db.collection("cvspee").doc("products").set({ map: _cloud.products });
+            db.collection("cvspee").doc("products").set({ map: _cloud.products, deletedDefaults: _cloud.deletedDefaults });
         }
     }
 
@@ -8865,7 +8867,7 @@ body.dark-mode .wishlist-item {
         });
 
         if (changed) {
-            db.collection("cvspee").doc("products").set({ map: _cloud.products });
+            db.collection("cvspee").doc("products").set({ map: _cloud.products, deletedDefaults: _cloud.deletedDefaults });
             renderProductGrid();
         }
     }
@@ -9294,7 +9296,11 @@ body.dark-mode .wishlist-item {
 
         _cloud.products[id] = product;
         PRODUCTS[id] = product;
-        db.collection("cvspee").doc("products").set({ map: _cloud.products });
+        if (_cloud.deletedDefaults) {
+            var ddIdx = _cloud.deletedDefaults.indexOf(id);
+            if (ddIdx !== -1) _cloud.deletedDefaults.splice(ddIdx, 1);
+        }
+        db.collection("cvspee").doc("products").set({ map: _cloud.products, deletedDefaults: _cloud.deletedDefaults });
 
         errorEl.textContent = "";
         closeAddProductModal();
@@ -9310,7 +9316,13 @@ body.dark-mode .wishlist-item {
         showConfirmModal("Remove this product from the shop?", function () {
             delete _cloud.products[productId];
             delete PRODUCTS[productId];
-            db.collection("cvspee").doc("products").set({ map: _cloud.products });
+
+            if (!_cloud.deletedDefaults) _cloud.deletedDefaults = [];
+            if (_cloud.deletedDefaults.indexOf(productId) === -1) {
+                _cloud.deletedDefaults.push(productId);
+            }
+
+            db.collection("cvspee").doc("products").set({ map: _cloud.products, deletedDefaults: _cloud.deletedDefaults });
 
             renderProductGrid();
         }, { title: "Remove Product", okText: "Remove" });
@@ -9468,7 +9480,7 @@ body.dark-mode .wishlist-item {
 
         _cloud.products[productId] = updatedProduct;
         PRODUCTS[productId] = updatedProduct;
-        db.collection("cvspee").doc("products").set({ map: _cloud.products });
+        db.collection("cvspee").doc("products").set({ map: _cloud.products, deletedDefaults: _cloud.deletedDefaults });
 
         errorEl.textContent = "";
         closeEditProductModal();
@@ -9488,7 +9500,7 @@ body.dark-mode .wishlist-item {
         showConfirmModal("Remove this product from the shop?", function () {
             delete _cloud.products[productId];
             delete PRODUCTS[productId];
-            db.collection("cvspee").doc("products").set({ map: _cloud.products });
+            db.collection("cvspee").doc("products").set({ map: _cloud.products, deletedDefaults: _cloud.deletedDefaults });
 
             closeEditProductModal();
             renderProductGrid();
