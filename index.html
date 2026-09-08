@@ -9500,6 +9500,12 @@ body.dark-mode .wishlist-item {
         showConfirmModal("Remove this product from the shop?", function () {
             delete _cloud.products[productId];
             delete PRODUCTS[productId];
+
+            if (!_cloud.deletedDefaults) _cloud.deletedDefaults = [];
+            if (_cloud.deletedDefaults.indexOf(productId) === -1) {
+                _cloud.deletedDefaults.push(productId);
+            }
+
             db.collection("cvspee").doc("products").set({ map: _cloud.products, deletedDefaults: _cloud.deletedDefaults });
 
             closeEditProductModal();
