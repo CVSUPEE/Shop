@@ -475,7 +475,11 @@ def _parse_verify_json(raw_text):
 # I-update mo ito kapag nagbago ang mga flow sa site.
 SITE_KNOWLEDGE = "\n".join([
     "Tungkol sa CVSPEE:",
-    "- Ang CVSPEE ay isang online shop para sa sports apparel at gear.",
+    "- Ang CVSPEE ay ang opisyal na campus shop ng Cavite State "
+    "University (CvSU) — dito binibili ang mga school at department "
+    "uniforms, PE gear, school supplies, bags, at CVSU ID lace, at "
+    "iba pang campus essentials para sa mga estudyante, guro, at "
+    "magulang.",
     "- Contact: Facebook \"CVSPEE Shop\", Email CVSPEEshop@gmail.com, "
     "Number +63 992 988 3855.",
     "",
