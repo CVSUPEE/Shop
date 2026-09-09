@@ -9475,7 +9475,7 @@ body.dark-mode .wishlist-item {
             sizes: sizes,
             stock: stock,
             discount: discount,
-            createdAt: existing.createdAt
+            createdAt: (typeof existing.createdAt === "number") ? existing.createdAt : null
         };
 
         _cloud.products[productId] = updatedProduct;
