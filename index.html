@@ -7113,7 +7113,6 @@ body.dark-mode .wishlist-item {
     }
 
     var _usersServerConfirmed = false;
-    var _dmsServerConfirmed = false;
 
     db.collection("cvspee").doc("users").onSnapshot(function (doc) {
         _cloud.users = (doc.exists && doc.data().list) ? doc.data().list : [];
@@ -7195,7 +7194,6 @@ body.dark-mode .wishlist-item {
     db.collection("cvspee").doc("dms").onSnapshot(function (doc) {
         _cloud.dms = (doc.exists && doc.data().map) ? doc.data().map : {};
         _cloud.ready.dms = true;
-        if (!doc.metadata.fromCache) _dmsServerConfirmed = true;
         _onCloudChange("dms");
     }, function (err) { console.error("dms sync error", err); });
 
@@ -12268,6 +12266,8 @@ body.dark-mode .wishlist-item {
     var messageNotificationSound = new Audio("Sound/message.wav");
     var _lastSeenNewestDmTs = 0;
     var _dmSoundInitialized = false;
+    var _dmSoundWarmupUntil = 0;
+    var DM_SOUND_WARMUP_MS = 4000;
 
     // Browsers block audio.play() until the page has had at least one
     // real user interaction (click/tap/keypress). We "unlock" playback
@@ -12325,24 +12325,21 @@ body.dark-mode .wishlist-item {
             });
         });
 
-        if (!_dmsServerConfirmed) {
-            // Still only working off a (possibly stale/offline) local
-            // cache — keep tracking the newest timestamp seen so far,
-            // but don't treat anything as "new" yet. A stale cache can
-            // be missing a message that actually arrived while this
-            // device was offline/closed, and comparing against it too
-            // early is exactly what was causing a false "ding" right
-            // when the app opens.
-            _lastSeenNewestDmTs = Math.max(_lastSeenNewestDmTs, newestFromOthersTs);
+        if (!_dmSoundInitialized) {
+            // First check after load/login — lock in a starting baseline
+            // and open a short "warmup" window (rather than a sound
+            // right away) so pre-existing messages don't trigger a
+            // false ding, and so a stale-cache-then-fresh-server jump
+            // (common with Firestore offline persistence) has time to
+            // settle before we start comparing for real.
+            _lastSeenNewestDmTs = newestFromOthersTs;
+            _dmSoundInitialized = true;
+            _dmSoundWarmupUntil = Date.now() + DM_SOUND_WARMUP_MS;
             return;
         }
 
-        if (!_dmSoundInitialized) {
-            // First server-confirmed check after load/login — lock in
-            // the real baseline so pre-existing unread messages don't
-            // trigger a sound; only genuinely new ones after this do.
+        if (Date.now() < _dmSoundWarmupUntil) {
             _lastSeenNewestDmTs = Math.max(_lastSeenNewestDmTs, newestFromOthersTs);
-            _dmSoundInitialized = true;
             return;
         }
 
