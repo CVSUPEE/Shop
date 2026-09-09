@@ -7113,6 +7113,7 @@ body.dark-mode .wishlist-item {
     }
 
     var _usersServerConfirmed = false;
+    var _dmsServerConfirmed = false;
 
     db.collection("cvspee").doc("users").onSnapshot(function (doc) {
         _cloud.users = (doc.exists && doc.data().list) ? doc.data().list : [];
@@ -7194,6 +7195,7 @@ body.dark-mode .wishlist-item {
     db.collection("cvspee").doc("dms").onSnapshot(function (doc) {
         _cloud.dms = (doc.exists && doc.data().map) ? doc.data().map : {};
         _cloud.ready.dms = true;
+        if (!doc.metadata.fromCache) _dmsServerConfirmed = true;
         _onCloudChange("dms");
     }, function (err) { console.error("dms sync error", err); });
 
@@ -12267,6 +12269,29 @@ body.dark-mode .wishlist-item {
     var _lastSeenNewestDmTs = 0;
     var _dmSoundInitialized = false;
 
+    // Browsers block audio.play() until the page has had at least one
+    // real user interaction (click/tap/keypress). We "unlock" playback
+    // early by doing a silent play+pause on the first interaction, so
+    // the actual notification sound isn't the one that gets blocked.
+    var _dmSoundUnlocked = false;
+
+    function unlockMessageNotificationSound() {
+        if (_dmSoundUnlocked) return;
+        messageNotificationSound.play().then(function () {
+            messageNotificationSound.pause();
+            messageNotificationSound.currentTime = 0;
+            _dmSoundUnlocked = true;
+            document.removeEventListener("click", unlockMessageNotificationSound);
+            document.removeEventListener("touchstart", unlockMessageNotificationSound);
+            document.removeEventListener("keydown", unlockMessageNotificationSound);
+        }).catch(function () {
+            // Still blocked — harmless, we'll just try again on the next interaction.
+        });
+    }
+    document.addEventListener("click", unlockMessageNotificationSound);
+    document.addEventListener("touchstart", unlockMessageNotificationSound);
+    document.addEventListener("keydown", unlockMessageNotificationSound);
+
     function playMessageNotificationSound() {
         try {
             messageNotificationSound.currentTime = 0;
@@ -12300,11 +12325,23 @@ body.dark-mode .wishlist-item {
             });
         });
 
+        if (!_dmsServerConfirmed) {
+            // Still only working off a (possibly stale/offline) local
+            // cache — keep tracking the newest timestamp seen so far,
+            // but don't treat anything as "new" yet. A stale cache can
+            // be missing a message that actually arrived while this
+            // device was offline/closed, and comparing against it too
+            // early is exactly what was causing a false "ding" right
+            // when the app opens.
+            _lastSeenNewestDmTs = Math.max(_lastSeenNewestDmTs, newestFromOthersTs);
+            return;
+        }
+
         if (!_dmSoundInitialized) {
-            // First check after load/login — just record the current
-            // newest message so pre-existing unread messages don't
-            // trigger a sound; only genuinely new ones after this point do.
-            _lastSeenNewestDmTs = newestFromOthersTs;
+            // First server-confirmed check after load/login — lock in
+            // the real baseline so pre-existing unread messages don't
+            // trigger a sound; only genuinely new ones after this do.
+            _lastSeenNewestDmTs = Math.max(_lastSeenNewestDmTs, newestFromOthersTs);
             _dmSoundInitialized = true;
             return;
         }
