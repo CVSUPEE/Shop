@@ -12263,43 +12263,76 @@ body.dark-mode .wishlist-item {
     // ------------------------------------------------------------
     // New-message notification sound
     // ------------------------------------------------------------
-    var messageNotificationSound = new Audio("Sound/message.wav");
+    // Synthesized in code (Web Audio API) instead of loading an audio
+    // file — no external file/path/hosting to go wrong, and no risk of
+    // a shared <audio> element getting stuck after the first play.
     var _lastSeenNewestDmTs = 0;
     var _dmSoundInitialized = false;
     var _dmSoundWarmupUntil = 0;
     var DM_SOUND_WARMUP_MS = 4000;
 
-    // Browsers block audio.play() until the page has had at least one
-    // real user interaction (click/tap/keypress). We "unlock" playback
-    // early by doing a silent play+pause on the first interaction, so
-    // the actual notification sound isn't the one that gets blocked.
-    var _dmSoundUnlocked = false;
+    var _notifAudioCtx = null;
 
+    function getNotifAudioCtx() {
+        var AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtxClass) return null;
+        if (!_notifAudioCtx) {
+            try {
+                _notifAudioCtx = new AudioCtxClass();
+            } catch (e) {
+                console.error("Could not create audio context:", e);
+                return null;
+            }
+        }
+        if (_notifAudioCtx.state === "suspended") {
+            _notifAudioCtx.resume().catch(function () {});
+        }
+        return _notifAudioCtx;
+    }
+
+    // Browsers only let an AudioContext actually produce sound after the
+    // page has had at least one real user interaction (click/tap/key).
+    // Creating/resuming it early on that first interaction "unlocks" it
+    // so the real notification later isn't the one that gets blocked.
+    var _dmSoundUnlocked = false;
     function unlockMessageNotificationSound() {
         if (_dmSoundUnlocked) return;
-        messageNotificationSound.play().then(function () {
-            messageNotificationSound.pause();
-            messageNotificationSound.currentTime = 0;
+        var ctx = getNotifAudioCtx();
+        if (ctx && ctx.state === "running") {
             _dmSoundUnlocked = true;
             document.removeEventListener("click", unlockMessageNotificationSound);
             document.removeEventListener("touchstart", unlockMessageNotificationSound);
             document.removeEventListener("keydown", unlockMessageNotificationSound);
-        }).catch(function () {
-            // Still blocked — harmless, we'll just try again on the next interaction.
-        });
+        }
     }
     document.addEventListener("click", unlockMessageNotificationSound);
     document.addEventListener("touchstart", unlockMessageNotificationSound);
     document.addEventListener("keydown", unlockMessageNotificationSound);
 
+    function playTone(ctx, freq, startTime, peakGain, duration) {
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        gain.gain.setValueAtTime(0.0001, startTime);
+        gain.gain.linearRampToValueAtTime(peakGain, startTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+        osc.start(startTime);
+        osc.stop(startTime + duration + 0.02);
+    }
+
     function playMessageNotificationSound() {
         try {
-            messageNotificationSound.currentTime = 0;
-            messageNotificationSound.play().catch(function (err) {
-                // Browsers block autoplay until the user has interacted with
-                // the page at least once — that's expected, not a real error.
-                console.debug("Notification sound blocked:", err);
-            });
+            var ctx = getNotifAudioCtx();
+            if (!ctx) return;
+            var now = ctx.currentTime;
+            // Simple two-note "ding-dong" chime.
+            playTone(ctx, 880, now, 0.18, 0.16);
+            playTone(ctx, 659, now + 0.13, 0.16, 0.2);
         } catch (e) {
             console.error("Notification sound error:", e);
         }
