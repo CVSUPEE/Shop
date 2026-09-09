@@ -5966,7 +5966,7 @@ body.dark-mode .wishlist-item {
 
         <h3>Add a Product</h3>
 
-        <form class="auth-form active" onsubmit="return submitAddProduct(event)">
+        <form class="auth-form active" onsubmit="return submitAddProduct(event)" novalidate>
             <input type="text" id="newProductName" placeholder="Product name" required>
             <input type="number" id="newProductPrice" placeholder="Price (₱)" min="0" step="0.01" required>
 
@@ -6032,7 +6032,7 @@ body.dark-mode .wishlist-item {
 
         <h3>Edit Product</h3>
 
-        <form class="auth-form active" onsubmit="return submitEditProduct(event)">
+        <form class="auth-form active" onsubmit="return submitEditProduct(event)" novalidate>
             <input type="text" id="editProductName" placeholder="Product name" required>
             <input type="number" id="editProductPrice" placeholder="Price (₱)" min="0" step="0.01" required>
 
