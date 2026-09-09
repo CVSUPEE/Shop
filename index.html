@@ -7108,6 +7108,7 @@ body.dark-mode .wishlist-item {
         if (kind === "dms") {
             if (typeof renderDmMessages === "function") renderDmMessages();
             if (typeof renderChatHeadDock === "function") renderChatHeadDock();
+            if (typeof checkForNewIncomingDm === "function") checkForNewIncomingDm();
         }
     }
 
@@ -7381,6 +7382,7 @@ body.dark-mode .wishlist-item {
         migrateLegacyCart();
         sendPresenceHeartbeat();
         loadDarkModeForCurrentUser();
+        _dmSoundInitialized = false;
     }
 
     var authSubtitles = {
@@ -12258,6 +12260,67 @@ body.dark-mode .wishlist-item {
         return [a, b].sort().join("::");
     }
 
+    // ------------------------------------------------------------
+    // New-message notification sound
+    // ------------------------------------------------------------
+    var messageNotificationSound = new Audio("Sound/message.wav");
+    var _lastSeenNewestDmTs = 0;
+    var _dmSoundInitialized = false;
+
+    function playMessageNotificationSound() {
+        try {
+            messageNotificationSound.currentTime = 0;
+            messageNotificationSound.play().catch(function (err) {
+                // Browsers block autoplay until the user has interacted with
+                // the page at least once — that's expected, not a real error.
+                console.debug("Notification sound blocked:", err);
+            });
+        } catch (e) {
+            console.error("Notification sound error:", e);
+        }
+    }
+
+    function checkForNewIncomingDm() {
+        var user = getCurrentUser();
+        if (!user) return;
+
+        var dms = getDms();
+        var newestFromOthersTs = 0;
+        var newestFromOthersOtherEmail = null;
+
+        Object.keys(dms).forEach(function (convId) {
+            var conv = dms[convId];
+            if (!conv || !conv.participants || conv.participants.indexOf(user.email) === -1) return;
+            var otherEmail = conv.participants[0] === user.email ? conv.participants[1] : conv.participants[0];
+            (conv.messages || []).forEach(function (m) {
+                if (m.sender !== user.email && (m.ts || 0) > newestFromOthersTs) {
+                    newestFromOthersTs = m.ts || 0;
+                    newestFromOthersOtherEmail = otherEmail;
+                }
+            });
+        });
+
+        if (!_dmSoundInitialized) {
+            // First check after load/login — just record the current
+            // newest message so pre-existing unread messages don't
+            // trigger a sound; only genuinely new ones after this point do.
+            _lastSeenNewestDmTs = newestFromOthersTs;
+            _dmSoundInitialized = true;
+            return;
+        }
+
+        if (newestFromOthersTs > _lastSeenNewestDmTs) {
+            _lastSeenNewestDmTs = newestFromOthersTs;
+
+            var dmWindowOpenForThisConv = currentDmOtherEmail === newestFromOthersOtherEmail &&
+                document.getElementById("dmOverlay").classList.contains("show");
+
+            if (!dmWindowOpenForThisConv) {
+                playMessageNotificationSound();
+            }
+        }
+    }
+
     function getDms() {
         return _cloud.dms || {};
     }
@@ -12617,6 +12680,7 @@ body.dark-mode .wishlist-item {
         updateNotifBadge();
         renderChatHeadDock();
         updateAccountIconDots();
+        checkForNewIncomingDm();
 
         if (document.getElementById("ordersPanelOverlay").classList.contains("show")) {
             renderOrdersPanel();
