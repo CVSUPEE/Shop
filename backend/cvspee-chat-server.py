@@ -1,40 +1,4 @@
-# ============================================================
-# CVSPEE — AI Assistant backend (Python + Gemini, LIBRE)
-# ============================================================
-# Isang Flask app na ito na may DALAWANG endpoint:
-#
-#   POST /api/product-chat   -> yung "Buy Now" chat sa bawat produkto
-#                                (nakakaalam ng presyo/size/stock ng
-#                                produktong tinitingnan, pwede mag
-#                                itala ng size gamit ang select_size)
-#
-#   POST /api/support-chat   -> yung "Contact Support" chat
-#                                (tungkol lang sa website, produkto,
-#                                at account — paggawa ng account,
-#                                login, reset password, atbp.)
-#
-# Gumagamit ito ng Google Gemini API — may libreng tier
-# (1,500 requests/araw), walang credit card.
-#
-# I-drop mo ito sa "backend" folder ng repo mo (kapalit ng dating
-# product-chat-server.py at support-chat-server.py — iisa na lang
-# itong file, iisang deployment). Kailangan mo lang:
-#
-#   pip install flask flask-cors google-genai
-#
-# Tapos i-set ang env var bago patakbuhin:
-#   GEMINI_API_KEY=xxxxx python cvspee-chat-server.py
-#
-# Kunin ang libreng API key sa: https://aistudio.google.com/apikey
-# (mag-sign in gamit ang Google account, i-tap "Create API key" —
-# walang credit card na hinihingi.)
-#
-# Ang index.html mo ay tumatawag sa parehong domain para sa dalawa
-# (hal. https://shop-production-bc79.up.railway.app/api/product-chat
-# at .../api/support-chat), kaya't dahil iisang Flask app na ito na
-# may dalawang route, gagana ito nang walang kailangang baguhin sa
-# endpoint URLs sa index.html.
-# ============================================================
+
 
 import base64
 import binascii
@@ -481,7 +445,7 @@ SITE_KNOWLEDGE = "\n".join([
     "iba pang campus essentials para sa mga estudyante, guro, at "
     "magulang.",
     "- Contact: Facebook \"CVSPEE Shop\", Email CVSPEEshop@gmail.com, "
-    "Number +63 992 988 3855.",
+    "Number +639166457480.",
     "",
     "Paano gumawa ng account (Sign Up):",
     "1. I-tap ang Account icon sa navbar, pumunta sa \"Sign Up\" tab.",
