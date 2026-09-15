@@ -4607,6 +4607,10 @@ body.dark-mode .wishlist-item {
     min-height: 16px;
 }
 
+.map-picker-address-error {
+    color: #c0392b;
+}
+
 .order-map-link {
     display: inline-flex;
     align-items: center;
@@ -10568,7 +10572,7 @@ body.dark-mode .wishlist-item {
             if (!mapPicker.map) {
                 mapPicker.map = L.map("mapPickerMap").setView([startLat, startLng], 15);
 
-                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
                     maxZoom: 19,
                     attribution: '&copy; OpenStreetMap contributors'
                 }).addTo(mapPicker.map);
@@ -10591,6 +10595,7 @@ body.dark-mode .wishlist-item {
             }
 
             var addressEl = document.getElementById("mapPickerAddress");
+            addressEl.classList.remove("map-picker-address-error");
             if (existing) {
                 addressEl.textContent = existing.address || ("Pin set at " + existing.lat.toFixed(5) + ", " + existing.lng.toFixed(5));
             } else {
@@ -10604,14 +10609,19 @@ body.dark-mode .wishlist-item {
     }
 
     function locateMeOnMap() {
+        var addressEl = document.getElementById("mapPickerAddress");
+
         if (!navigator.geolocation) {
-            alert("Your browser doesn't support location detection. Please drag the pin instead.");
+            addressEl.classList.add("map-picker-address-error");
+            addressEl.textContent = "Location detection isn't supported here. Please drag the pin instead.";
             return;
         }
 
         var btn = document.getElementById("mapLocateBtn");
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Locating…';
+        addressEl.classList.remove("map-picker-address-error");
+        addressEl.textContent = "Getting your current location…";
 
         function resetBtn() {
             btn.disabled = false;
@@ -10636,7 +10646,8 @@ body.dark-mode .wishlist-item {
                     msg = "Getting your location took too long. Please drag the pin to set it manually.";
                 }
             }
-            alert(msg);
+            addressEl.classList.add("map-picker-address-error");
+            addressEl.textContent = msg;
             resetBtn();
         }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
     }
@@ -10647,6 +10658,7 @@ body.dark-mode .wishlist-item {
         mapPicker.address = "";
 
         var addressEl = document.getElementById("mapPickerAddress");
+        addressEl.classList.remove("map-picker-address-error");
         addressEl.textContent = "Looking up address…";
         document.getElementById("mapConfirmBtn").disabled = false;
 
@@ -11470,6 +11482,9 @@ body.dark-mode .wishlist-item {
         document.getElementById("walletLocationEmpty").style.display = "block";
         document.getElementById("walletLocationSet").style.display = "none";
 
+        if (mapPicker.map) {
+            mapPicker.map.remove();
+        }
         mapPicker = { map: null, marker: null, lat: null, lng: null, address: "" };
         var mapContainer = document.getElementById("mapPickerMap");
         if (mapContainer) mapContainer.innerHTML = "";
