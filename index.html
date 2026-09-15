@@ -4480,6 +4480,143 @@ body.dark-mode .wishlist-item {
     font-size: 14px;
 }
 
+.location-picker {
+    border: 1px dashed #ccc;
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+}
+
+.location-pin-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    background: #1F3A2E;
+    color: #fff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.location-pin-btn:hover {
+    background: #16291f;
+}
+
+.location-pin-hint {
+    margin-top: 8px;
+    font-size: 11px;
+    color: #888;
+}
+
+.location-picker-set {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border: 1px solid #b8e6c1;
+    background: #e8f5e9;
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+
+.location-set-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.location-set-info i {
+    color: #1F3A2E;
+    margin-top: 2px;
+}
+
+.location-set-label {
+    font-size: 12px;
+    font-weight: bold;
+    color: #1F3A2E;
+}
+
+.location-set-address {
+    font-size: 12px;
+    color: #555;
+    margin-top: 2px;
+}
+
+.location-change-btn {
+    flex-shrink: 0;
+    padding: 7px 12px;
+    border: 1px solid #1F3A2E;
+    border-radius: 8px;
+    background: #fff;
+    color: #1F3A2E;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.map-picker-box {
+    max-width: 480px;
+    width: 92%;
+}
+
+.map-picker-map-wrap {
+    margin: 10px 0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #ddd;
+}
+
+#mapPickerMap {
+    height: 320px;
+    width: 100%;
+}
+
+.map-locate-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 9px 12px;
+    margin-top: 10px;
+    border: 1px solid #1F3A2E;
+    border-radius: 8px;
+    background: #fff;
+    color: #1F3A2E;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.map-locate-btn:hover {
+    background: #e8f5e9;
+}
+
+.map-picker-address {
+    font-size: 12px;
+    color: #555;
+    text-align: center;
+    margin: 10px 0;
+    min-height: 16px;
+}
+
+.order-map-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #1F3A2E;
+    font-weight: bold;
+    text-decoration: underline;
+    margin: 4px 0 8px;
+}
+
 .order-confirm {
     text-align: center;
     padding: 10px 0 20px;
@@ -5264,6 +5401,9 @@ body.dark-mode .wishlist-item {
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css">
 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script>
         (function () {
@@ -5562,10 +5702,27 @@ body.dark-mode .wishlist-item {
 
         <form class="payment-step" id="paymentStepCod" onsubmit="return submitCodPayment(event)">
             <p class="payment-subtitle">Cash on Delivery details</p>
-            <input type="text" id="codAddress" placeholder="Address" required>
-            <input type="text" id="codYearLevel" placeholder="Year Level" required>
-            <input type="text" id="codSection" placeholder="Section" required>
-            <input type="text" id="codPhone" placeholder="Phone Number" required>
+            <input type="text" id="codName" placeholder="Full Name" required>
+            <input type="tel" id="codPhone" placeholder="Phone Number" required>
+
+            <div class="location-picker" id="codLocationEmpty">
+                <button type="button" class="location-pin-btn" onclick="openMapPicker()">
+                    <i class="fa-solid fa-location-dot"></i> Pin Your Delivery Location
+                </button>
+                <p class="location-pin-hint">We'll use this to find you for delivery.</p>
+            </div>
+
+            <div class="location-picker-set" id="codLocationSet" style="display:none;">
+                <div class="location-set-info">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <div>
+                        <p class="location-set-label">Delivery location set</p>
+                        <p class="location-set-address" id="codLocationAddress"></p>
+                    </div>
+                </div>
+                <button type="button" class="location-change-btn" onclick="openMapPicker()">Change</button>
+            </div>
+
             <p class="auth-error" id="codError"></p>
             <button type="submit" class="btn auth-submit">Place Order</button>
             <a href="#" class="auth-link" onclick="backToPaymentMethod(); return false;">Back</a>
@@ -5589,6 +5746,30 @@ body.dark-mode .wishlist-item {
             </div>
             <button type="button" class="btn auth-submit" onclick="closePayment()">Done</button>
         </div>
+
+    </div>
+
+</div>
+
+<div class="modal-overlay" id="mapPickerOverlay">
+
+    <div class="modal-box map-picker-box">
+
+        <button type="button" class="modal-close" onclick="closeMapPicker()">&times;</button>
+
+        <p class="payment-subtitle">Drag the pin to your exact delivery location</p>
+
+        <div class="map-picker-map-wrap">
+            <div id="mapPickerMap"></div>
+        </div>
+
+        <button type="button" class="map-locate-btn" id="mapLocateBtn" onclick="locateMeOnMap()">
+            <i class="fa-solid fa-crosshairs"></i> Use My Current Location
+        </button>
+
+        <p class="map-picker-address" id="mapPickerAddress">Move the map or drag the pin to set your location.</p>
+
+        <button type="button" class="btn auth-submit" id="mapConfirmBtn" onclick="confirmMapPin()" disabled>Confirm Location</button>
 
     </div>
 
@@ -9599,6 +9780,25 @@ body.dark-mode .wishlist-item {
         return div.innerHTML;
     }
 
+    function codDetailsHtml(details) {
+        details = details || {};
+        var html = "";
+
+        html += '<strong>Name:</strong> ' + escapeHtml(details.name) + '<br>';
+        html += '<strong>Phone:</strong> ' + escapeHtml(details.phone) + '<br>';
+
+        if (details.lat != null && details.lng != null) {
+            var mapsUrl = "https://www.google.com/maps?q=" + details.lat + "," + details.lng;
+            html +=
+                '<strong>Delivery Location:</strong> ' + escapeHtml(details.address || (details.lat.toFixed(5) + ", " + details.lng.toFixed(5))) + '<br>' +
+                '<a href="' + mapsUrl + '" target="_blank" rel="noopener" class="order-map-link"><i class="fa-solid fa-location-dot"></i> View Location on Map</a><br>';
+        } else if (details.address) {
+            html += '<strong>Address:</strong> ' + escapeHtml(details.address) + '<br>';
+        }
+
+        return html;
+    }
+
     var COMMENT_COOLDOWN_MS = 10000;
 
     function getReviews(productId) {
@@ -10294,8 +10494,8 @@ body.dark-mode .wishlist-item {
 
     var WALLET_ACCOUNTS = {
         GCash: [
-            { label: "Name", value: "JENELYN DIAZ" },
-            { label: "GCash Number", value: "09929883855" }
+            { label: "Name", value: "CVSPEE OFFICIAL" },
+            { label: "GCash Number", value: "09173456821" }
         ]
     };
 
@@ -10303,6 +10503,111 @@ body.dark-mode .wishlist-item {
     var chatMode = "buy";
     var chatFlowSource = "buy"; 
     var paymentProofDataUrl = null;
+
+    var mapPicker = { map: null, marker: null, lat: null, lng: null, address: "" };
+    var codPinLocation = null;
+    var DEFAULT_MAP_CENTER = { lat: 14.2456, lng: 120.8770 };
+
+    function openMapPicker() {
+        document.getElementById("mapPickerOverlay").classList.add("show");
+        document.getElementById("mapConfirmBtn").disabled = !mapPicker.lat;
+
+        setTimeout(function () {
+            if (!mapPicker.map) {
+                var startLat = codPinLocation ? codPinLocation.lat : DEFAULT_MAP_CENTER.lat;
+                var startLng = codPinLocation ? codPinLocation.lng : DEFAULT_MAP_CENTER.lng;
+
+                mapPicker.map = L.map("mapPickerMap").setView([startLat, startLng], 15);
+
+                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                    maxZoom: 19,
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(mapPicker.map);
+
+                mapPicker.marker = L.marker([startLat, startLng], { draggable: true }).addTo(mapPicker.map);
+
+                mapPicker.marker.on("dragend", function () {
+                    var pos = mapPicker.marker.getLatLng();
+                    setMapPickerLocation(pos.lat, pos.lng);
+                });
+
+                mapPicker.map.on("click", function (e) {
+                    mapPicker.marker.setLatLng(e.latlng);
+                    setMapPickerLocation(e.latlng.lat, e.latlng.lng);
+                });
+
+                if (codPinLocation) {
+                    setMapPickerLocation(codPinLocation.lat, codPinLocation.lng);
+                }
+            } else {
+                mapPicker.map.invalidateSize();
+            }
+        }, 50);
+    }
+
+    function closeMapPicker() {
+        document.getElementById("mapPickerOverlay").classList.remove("show");
+    }
+
+    function locateMeOnMap() {
+        if (!navigator.geolocation) {
+            alert("Your browser doesn't support location detection. Please drag the pin instead.");
+            return;
+        }
+
+        var btn = document.getElementById("mapLocateBtn");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Locating…';
+
+        navigator.geolocation.getCurrentPosition(function (pos) {
+            var lat = pos.coords.latitude;
+            var lng = pos.coords.longitude;
+
+            mapPicker.map.setView([lat, lng], 16);
+            mapPicker.marker.setLatLng([lat, lng]);
+            setMapPickerLocation(lat, lng);
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-crosshairs"></i> Use My Current Location';
+        }, function () {
+            alert("We couldn't get your location. Please drag the pin to set it manually.");
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-crosshairs"></i> Use My Current Location';
+        });
+    }
+
+    function setMapPickerLocation(lat, lng) {
+        mapPicker.lat = lat;
+        mapPicker.lng = lng;
+        mapPicker.address = "";
+
+        var addressEl = document.getElementById("mapPickerAddress");
+        addressEl.textContent = "Looking up address…";
+        document.getElementById("mapConfirmBtn").disabled = false;
+
+        fetch("https://nominatim.openstreetmap.org/reverse?format=json&lat=" + lat + "&lon=" + lng + "&zoom=18")
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                mapPicker.address = (data && data.display_name) ? data.display_name : "";
+                addressEl.textContent = mapPicker.address || ("Pin set at " + lat.toFixed(5) + ", " + lng.toFixed(5));
+            })
+            .catch(function () {
+                addressEl.textContent = "Pin set at " + lat.toFixed(5) + ", " + lng.toFixed(5);
+            });
+    }
+
+    function confirmMapPin() {
+        if (!mapPicker.lat) return;
+
+        codPinLocation = { lat: mapPicker.lat, lng: mapPicker.lng, address: mapPicker.address };
+
+        document.getElementById("codLocationEmpty").style.display = "none";
+        document.getElementById("codLocationSet").style.display = "flex";
+        document.getElementById("codLocationAddress").textContent =
+            codPinLocation.address || (codPinLocation.lat.toFixed(5) + ", " + codPinLocation.lng.toFixed(5));
+
+        closeMapPicker();
+    }
 
     function openBuyChat() {
         openProductChat("buy");
@@ -10856,6 +11161,7 @@ body.dark-mode .wishlist-item {
         document.getElementById("paymentOverlay").classList.remove("show");
         checkoutOrder = null;
         selectedPaymentMethod = null;
+        resetCodForm();
     }
 
     function goToPaymentStep(stepId) {
@@ -11020,20 +11326,41 @@ body.dark-mode .wishlist-item {
     function submitCodPayment(e) {
         e.preventDefault();
 
-        var address = document.getElementById("codAddress").value.trim();
-        var yearLevel = document.getElementById("codYearLevel").value.trim();
-        var section = document.getElementById("codSection").value.trim();
+        var name = document.getElementById("codName").value.trim();
         var phone = document.getElementById("codPhone").value.trim();
         var errorEl = document.getElementById("codError");
 
-        if (!address || !yearLevel || !section || !phone) {
+        if (!name || !phone) {
             errorEl.textContent = "Please fill in all fields.";
             return false;
         }
 
+        if (!codPinLocation) {
+            errorEl.textContent = "Please pin your delivery location.";
+            return false;
+        }
+
         errorEl.textContent = "";
-        finalizeOrder({ address: address, yearLevel: yearLevel, section: section, phone: phone });
+        finalizeOrder({
+            name: name,
+            phone: phone,
+            lat: codPinLocation.lat,
+            lng: codPinLocation.lng,
+            address: codPinLocation.address
+        });
         return false;
+    }
+
+    function resetCodForm() {
+        document.getElementById("codName").value = "";
+        document.getElementById("codPhone").value = "";
+        document.getElementById("codError").textContent = "";
+        codPinLocation = null;
+        mapPicker = { map: null, marker: null, lat: null, lng: null, address: "" };
+        document.getElementById("codLocationEmpty").style.display = "block";
+        document.getElementById("codLocationSet").style.display = "none";
+        var mapContainer = document.getElementById("mapPickerMap");
+        if (mapContainer) mapContainer.innerHTML = "";
     }
 
     var currentOrderActionId = null;
@@ -11987,11 +12314,7 @@ body.dark-mode .wishlist-item {
             '<strong>Payment Method:</strong> ' + escapeHtml(order.method) + '<br>';
 
         if (order.method === "COD") {
-            detailsHtml +=
-                '<strong>Address:</strong> ' + escapeHtml(order.details.address) + '<br>' +
-                '<strong>Year Level:</strong> ' + escapeHtml(order.details.yearLevel) + '<br>' +
-                '<strong>Section:</strong> ' + escapeHtml(order.details.section) + '<br>' +
-                '<strong>Phone:</strong> ' + escapeHtml(order.details.phone) + '<br>';
+            detailsHtml += codDetailsHtml(order.details);
         } else {
             detailsHtml +=
                 '<strong>Payment Proof:</strong><br>' +
