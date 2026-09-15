@@ -5696,6 +5696,30 @@ body.dark-mode .wishlist-item {
             </div>
             <div class="gcash-owner-info" id="walletInfoDetails"></div>
             <p class="gcash-note">Note: after you send payment, take a screenshot. We will never ask for your card number, bank PIN, or OTP.</p>
+
+            <input type="text" id="walletName" placeholder="Full Name" required>
+            <input type="tel" id="walletPhone" placeholder="Phone Number" required>
+
+            <div class="location-picker" id="walletLocationEmpty">
+                <button type="button" class="location-pin-btn" onclick="openMapPicker('wallet')">
+                    <i class="fa-solid fa-location-dot"></i> Pin Your Delivery Location
+                </button>
+                <p class="location-pin-hint">We'll use this to find you for delivery.</p>
+            </div>
+
+            <div class="location-picker-set" id="walletLocationSet" style="display:none;">
+                <div class="location-set-info">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <div>
+                        <p class="location-set-label">Delivery location set</p>
+                        <p class="location-set-address" id="walletLocationAddress"></p>
+                    </div>
+                </div>
+                <button type="button" class="location-change-btn" onclick="openMapPicker('wallet')">Change</button>
+            </div>
+
+            <p class="auth-error" id="walletInfoError"></p>
+
             <button type="button" class="btn auth-submit" onclick="goToPaymentProofChat()">Next Process</button>
             <a href="#" class="auth-link" onclick="backToPaymentMethod(); return false;">Back</a>
         </div>
@@ -10506,17 +10530,42 @@ body.dark-mode .wishlist-item {
 
     var mapPicker = { map: null, marker: null, lat: null, lng: null, address: "" };
     var codPinLocation = null;
+    var walletPinLocation = null;
+    var mapPickerTarget = "cod";
     var DEFAULT_MAP_CENTER = { lat: 14.2456, lng: 120.8770 };
 
-    function openMapPicker() {
+    var LOCATION_TARGETS = {
+        cod: { emptyId: "codLocationEmpty", setId: "codLocationSet", addressId: "codLocationAddress" },
+        wallet: { emptyId: "walletLocationEmpty", setId: "walletLocationSet", addressId: "walletLocationAddress" }
+    };
+
+    function getPinLocation(target) {
+        return target === "wallet" ? walletPinLocation : codPinLocation;
+    }
+
+    function setPinLocation(target, value) {
+        if (target === "wallet") {
+            walletPinLocation = value;
+        } else {
+            codPinLocation = value;
+        }
+    }
+
+    function openMapPicker(target) {
+        mapPickerTarget = target === "wallet" ? "wallet" : "cod";
+
+        var existing = getPinLocation(mapPickerTarget);
+
         document.getElementById("mapPickerOverlay").classList.add("show");
-        document.getElementById("mapConfirmBtn").disabled = !mapPicker.lat;
+        document.getElementById("mapConfirmBtn").disabled = !existing;
+
+        mapPicker = { map: mapPicker.map, marker: mapPicker.marker, lat: existing ? existing.lat : null, lng: existing ? existing.lng : null, address: existing ? existing.address : "" };
 
         setTimeout(function () {
-            if (!mapPicker.map) {
-                var startLat = codPinLocation ? codPinLocation.lat : DEFAULT_MAP_CENTER.lat;
-                var startLng = codPinLocation ? codPinLocation.lng : DEFAULT_MAP_CENTER.lng;
+            var startLat = existing ? existing.lat : DEFAULT_MAP_CENTER.lat;
+            var startLng = existing ? existing.lng : DEFAULT_MAP_CENTER.lng;
 
+            if (!mapPicker.map) {
                 mapPicker.map = L.map("mapPickerMap").setView([startLat, startLng], 15);
 
                 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -10535,12 +10584,17 @@ body.dark-mode .wishlist-item {
                     mapPicker.marker.setLatLng(e.latlng);
                     setMapPickerLocation(e.latlng.lat, e.latlng.lng);
                 });
-
-                if (codPinLocation) {
-                    setMapPickerLocation(codPinLocation.lat, codPinLocation.lng);
-                }
             } else {
                 mapPicker.map.invalidateSize();
+                mapPicker.map.setView([startLat, startLng], 15);
+                mapPicker.marker.setLatLng([startLat, startLng]);
+            }
+
+            var addressEl = document.getElementById("mapPickerAddress");
+            if (existing) {
+                addressEl.textContent = existing.address || ("Pin set at " + existing.lat.toFixed(5) + ", " + existing.lng.toFixed(5));
+            } else {
+                addressEl.textContent = "Move the map or drag the pin to set your location.";
             }
         }, 50);
     }
@@ -10559,6 +10613,11 @@ body.dark-mode .wishlist-item {
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Locating…';
 
+        function resetBtn() {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-crosshairs"></i> Use My Current Location';
+        }
+
         navigator.geolocation.getCurrentPosition(function (pos) {
             var lat = pos.coords.latitude;
             var lng = pos.coords.longitude;
@@ -10567,13 +10626,19 @@ body.dark-mode .wishlist-item {
             mapPicker.marker.setLatLng([lat, lng]);
             setMapPickerLocation(lat, lng);
 
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-crosshairs"></i> Use My Current Location';
-        }, function () {
-            alert("We couldn't get your location. Please drag the pin to set it manually.");
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-crosshairs"></i> Use My Current Location';
-        });
+            resetBtn();
+        }, function (err) {
+            var msg = "We couldn't get your location. Please drag the pin to set it manually.";
+            if (err) {
+                if (err.code === 1) {
+                    msg = "Location access was denied. You can still drag the pin to set your delivery spot manually.";
+                } else if (err.code === 3) {
+                    msg = "Getting your location took too long. Please drag the pin to set it manually.";
+                }
+            }
+            alert(msg);
+            resetBtn();
+        }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
     }
 
     function setMapPickerLocation(lat, lng) {
@@ -10599,12 +10664,14 @@ body.dark-mode .wishlist-item {
     function confirmMapPin() {
         if (!mapPicker.lat) return;
 
-        codPinLocation = { lat: mapPicker.lat, lng: mapPicker.lng, address: mapPicker.address };
+        var pin = { lat: mapPicker.lat, lng: mapPicker.lng, address: mapPicker.address };
+        setPinLocation(mapPickerTarget, pin);
 
-        document.getElementById("codLocationEmpty").style.display = "none";
-        document.getElementById("codLocationSet").style.display = "flex";
-        document.getElementById("codLocationAddress").textContent =
-            codPinLocation.address || (codPinLocation.lat.toFixed(5) + ", " + codPinLocation.lng.toFixed(5));
+        var ids = LOCATION_TARGETS[mapPickerTarget];
+        document.getElementById(ids.emptyId).style.display = "none";
+        document.getElementById(ids.setId).style.display = "flex";
+        document.getElementById(ids.addressId).textContent =
+            pin.address || (pin.lat.toFixed(5) + ", " + pin.lng.toFixed(5));
 
         closeMapPicker();
     }
@@ -11197,6 +11264,22 @@ body.dark-mode .wishlist-item {
     function goToPaymentProofChat() {
         if (!checkoutOrder) return;
 
+        var name = document.getElementById("walletName").value.trim();
+        var phone = document.getElementById("walletPhone").value.trim();
+        var errorEl = document.getElementById("walletInfoError");
+
+        if (!name || !phone) {
+            errorEl.textContent = "Please fill in all fields.";
+            return;
+        }
+
+        if (!walletPinLocation) {
+            errorEl.textContent = "Please pin your delivery location.";
+            return;
+        }
+
+        errorEl.textContent = "";
+
         chatMode = "paymentProof";
         paymentProofDataUrl = null;
 
@@ -11258,7 +11341,18 @@ body.dark-mode .wishlist-item {
 
         closeBuyChat();
         document.getElementById("paymentOverlay").classList.add("show");
-        finalizeOrder({ paymentProof: paymentProofDataUrl });
+
+        var name = document.getElementById("walletName").value.trim();
+        var phone = document.getElementById("walletPhone").value.trim();
+
+        finalizeOrder({
+            name: name,
+            phone: phone,
+            lat: walletPinLocation ? walletPinLocation.lat : null,
+            lng: walletPinLocation ? walletPinLocation.lng : null,
+            address: walletPinLocation ? walletPinLocation.address : "",
+            paymentProof: paymentProofDataUrl
+        });
     }
 
     function backToPaymentMethod() {
@@ -11285,6 +11379,8 @@ body.dark-mode .wishlist-item {
 
         setTimeout(function () {
             var orders = getOrders();
+            var previousOrders = orders.slice();
+
             orders.push({
                 id: generateOrderId(),
                 buyerEmail: user.email,
@@ -11306,20 +11402,28 @@ body.dark-mode .wishlist-item {
                 sellerName: "",
                 sellerUnread: 0
             });
-            saveOrdersList(orders);
-            adjustStockForItems(checkoutOrder.items, -1);
 
-            if (checkoutOrder.source === "cart") {
-                saveCart([]);
-            }
+            saveOrdersList(orders, true).then(function () {
+                adjustStockForItems(checkoutOrder.items, -1);
 
-            document.getElementById("paymentConfirmText").textContent =
-                "Paid via " + selectedPaymentMethod + " — total ₱" + checkoutOrder.total.toFixed(2) + ". Thank you for shopping with CVSPEE! We'll notify you once the owner approves your order.";
+                if (checkoutOrder.source === "cart") {
+                    saveCart([]);
+                }
 
-            goToPaymentStep("paymentStepConfirm");
-            playOrderConfirmAnimation();
+                document.getElementById("paymentConfirmText").textContent =
+                    "Paid via " + selectedPaymentMethod + " — total ₱" + checkoutOrder.total.toFixed(2) + ". Thank you for shopping with CVSPEE! We'll notify you once the owner approves your order.";
 
-            refreshOrderUI();
+                goToPaymentStep("paymentStepConfirm");
+                playOrderConfirmAnimation();
+
+                refreshOrderUI();
+            }).catch(function (err) {
+                console.error("Failed to save order", err);
+                _cloud.orders = previousOrders;
+
+                alert("We couldn't place your order. Please check your connection and try again.");
+                goToPaymentStep(selectedPaymentMethod === "COD" ? "paymentStepCod" : "paymentStepWalletInfo");
+            });
         }, 1200);
     }
 
@@ -11356,9 +11460,17 @@ body.dark-mode .wishlist-item {
         document.getElementById("codPhone").value = "";
         document.getElementById("codError").textContent = "";
         codPinLocation = null;
-        mapPicker = { map: null, marker: null, lat: null, lng: null, address: "" };
         document.getElementById("codLocationEmpty").style.display = "block";
         document.getElementById("codLocationSet").style.display = "none";
+
+        document.getElementById("walletName").value = "";
+        document.getElementById("walletPhone").value = "";
+        document.getElementById("walletInfoError").textContent = "";
+        walletPinLocation = null;
+        document.getElementById("walletLocationEmpty").style.display = "block";
+        document.getElementById("walletLocationSet").style.display = "none";
+
+        mapPicker = { map: null, marker: null, lat: null, lng: null, address: "" };
         var mapContainer = document.getElementById("mapPickerMap");
         if (mapContainer) mapContainer.innerHTML = "";
     }
@@ -11369,11 +11481,18 @@ body.dark-mode .wishlist-item {
         return _cloud.orders;
     }
 
-    function saveOrdersList(orders) {
+    function saveOrdersList(orders, silent) {
         _cloud.orders = orders;
-        db.collection("cvspee").doc("orders").set({ list: orders }).catch(function (err) {
+        var writePromise = db.collection("cvspee").doc("orders").set({ list: orders });
+
+        if (silent) {
+            return writePromise;
+        }
+
+        return writePromise.catch(function (err) {
             console.error("Failed to save orders", err);
             alert("Something went wrong saving this order. Please check your connection and try again.");
+            throw err;
         });
     }
 
@@ -12313,9 +12432,11 @@ body.dark-mode .wishlist-item {
             '<strong>Total:</strong> ₱' + order.total.toFixed(2) + '<br>' +
             '<strong>Payment Method:</strong> ' + escapeHtml(order.method) + '<br>';
 
-        if (order.method === "COD") {
+        if (order.details && (order.details.name || order.details.lat != null)) {
             detailsHtml += codDetailsHtml(order.details);
-        } else {
+        }
+
+        if (order.details && order.details.paymentProof) {
             detailsHtml +=
                 '<strong>Payment Proof:</strong><br>' +
                 '<img src="' + order.details.paymentProof + '" class="order-action-proof-img" alt="Payment proof"><br>';
