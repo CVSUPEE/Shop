@@ -445,7 +445,7 @@ SITE_KNOWLEDGE = "\n".join([
     "iba pang campus essentials para sa mga estudyante, guro, at "
     "magulang.",
     "- Contact: Facebook \"CVSPEE Shop\", Email CVSPEEshop@gmail.com, "
-    "Number +639166457480.",
+    "Number +639173456821.",
     "",
     "Paano gumawa ng account (Sign Up):",
     "1. I-tap ang Account icon sa navbar, pumunta sa \"Sign Up\" tab.",
