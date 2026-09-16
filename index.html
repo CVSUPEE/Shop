@@ -11464,7 +11464,13 @@ body.dark-mode .wishlist-item {
                 console.error("Failed to save order", err);
                 _cloud.orders = previousOrders;
 
-                alert("We couldn't place your order. Please check your connection and try again.");
+                var msg = "We couldn't place your order. Please check your connection and try again.";
+                if (err && err.code === "permission-denied") {
+                    msg = "We couldn't place your order: the store isn't allowed to save it right now (permission-denied). Please tell the shop owner — the database access rules need to be updated.";
+                } else if (err && err.message) {
+                    msg = "We couldn't place your order (" + err.message + "). Please try again.";
+                }
+                alert(msg);
                 goToPaymentStep(selectedPaymentMethod === "COD" ? "paymentStepCod" : "paymentStepWalletInfo");
             });
         }, 1200);
@@ -11552,7 +11558,11 @@ body.dark-mode .wishlist-item {
 
         return writePromise.catch(function (err) {
             console.error("Failed to save orders", err);
-            alert("Something went wrong saving this order. Please check your connection and try again.");
+            var msg = "Something went wrong saving this order. Please check your connection and try again.";
+            if (err && err.code === "permission-denied") {
+                msg = "Couldn't save: the store isn't allowed to save orders right now (permission-denied). Please tell the shop owner — the database access rules need to be updated.";
+            }
+            alert(msg);
             throw err;
         });
     }
