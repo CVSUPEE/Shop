@@ -7364,11 +7364,42 @@ body.dark-mode .wishlist-item {
         _onCloudChange("products");
     }, function (err) { console.error("products sync error", err); });
 
-    db.collection("cvspee").doc("orders").onSnapshot(function (doc) {
-        _cloud.orders = (doc.exists && doc.data().list) ? doc.data().list : [];
+    // Orders live in their own subcollection (one Firestore document per
+    // order) instead of a single "cvspee/orders" doc holding a giant array.
+    // A single doc has a hard 1MB size cap, and payment-proof screenshots
+    // (base64 images) plus delivery details pushed that doc over the limit
+    // as orders piled up, causing "couldn't save order" failures. Each
+    // order now gets its own doc, so there's effectively no shared cap.
+    migrateLegacyOrdersIfNeeded();
+
+    db.collection("cvspeeOrders").orderBy("id").onSnapshot(function (snapshot) {
+        _cloud.orders = snapshot.docs.map(function (d) { return d.data(); });
         _cloud.ready.orders = true;
         _onCloudChange("orders");
     }, function (err) { console.error("orders sync error", err); });
+
+    function migrateLegacyOrdersIfNeeded() {
+        db.collection("cvspeeOrders").limit(1).get().then(function (snap) {
+            if (!snap.empty) return;
+
+            db.collection("cvspee").doc("orders").get().then(function (doc) {
+                var legacyList = (doc.exists && Array.isArray(doc.data().list)) ? doc.data().list : [];
+                if (legacyList.length === 0) return;
+
+                var batch = db.batch();
+                legacyList.forEach(function (o) {
+                    if (o && o.id) batch.set(db.collection("cvspeeOrders").doc(o.id), o);
+                });
+                batch.commit().catch(function (err) {
+                    console.error("Legacy order migration failed", err);
+                });
+            }).catch(function (err) {
+                console.error("Failed reading legacy orders doc", err);
+            });
+        }).catch(function (err) {
+            console.error("Failed checking orders subcollection", err);
+        });
+    }
 
     db.collection("cvspee").doc("reviews").onSnapshot(function (doc) {
         _cloud.reviews = (doc.exists && doc.data().map) ? doc.data().map : {};
@@ -10641,7 +10672,7 @@ body.dark-mode .wishlist-item {
             var msg = "We couldn't get your location. Please drag the pin to set it manually.";
             if (err) {
                 if (err.code === 1) {
-                    msg = "Location access was denied. You can still drag the pin to set your delivery spot manually.";
+                    msg = "Location access is blocked for this site. Tap the lock/site icon next to the address bar, allow Location, then try again — or just drag the pin.";
                 } else if (err.code === 3) {
                     msg = "Getting your location took too long. Please drag the pin to set it manually.";
                 }
@@ -11498,7 +11529,22 @@ body.dark-mode .wishlist-item {
 
     function saveOrdersList(orders, silent) {
         _cloud.orders = orders;
-        var writePromise = db.collection("cvspee").doc("orders").set({ list: orders });
+
+        var validOrders = orders.filter(function (o) { return o && o.id; });
+        var chunks = [];
+        for (var i = 0; i < validOrders.length; i += 450) {
+            chunks.push(validOrders.slice(i, i + 450));
+        }
+
+        var writePromise = chunks.reduce(function (chain, chunk) {
+            return chain.then(function () {
+                var batch = db.batch();
+                chunk.forEach(function (o) {
+                    batch.set(db.collection("cvspeeOrders").doc(o.id), o);
+                });
+                return batch.commit();
+            });
+        }, Promise.resolve());
 
         if (silent) {
             return writePromise;
