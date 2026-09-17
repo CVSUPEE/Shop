@@ -12,23 +12,16 @@ from google import genai
 from google.genai import types
 
 app = Flask(__name__)
-CORS(app)  # sa production, i-restrict mo ito sa domain ng site mo lang
+CORS(app)  
 
 client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
-# Gemini 3.5 Flash-Lite — pinakamataas na free-tier quota sa mga
-# available na Gemini model ngayon (mas mataas kaysa gemini-3.6-flash).
+
 MODEL = "gemini-3.5-flash-lite"
 
-# The model needs to "see" the image (vision) for the ID check.
-# flash-lite is multimodal too, but if it errors out on images due to
-# your quota/region, you can swap it for "gemini-3.5-flash".
 VISION_MODEL = "gemini-3.5-flash-lite"
 
-MAX_ID_IMAGE_BYTES = 6 * 1024 * 1024  # ~6MB after decoding
-
-# What type of ID is expected/required for each Sign Up role, and how
-# the AI should check whether the ID matches that role.
+MAX_ID_IMAGE_BYTES = 6 * 1024 * 1024
 ROLE_ID_REQUIREMENTS = {
     "Student": {
         "label": "Student ID",
@@ -67,9 +60,6 @@ ROLE_ID_REQUIREMENTS = {
 
 
 
-# ============================================================
-# /api/product-chat — per-product na shopping assistant
-# ============================================================
 @app.route("/api/product-chat", methods=["POST"])
 def product_chat():
     data = request.get_json(silent=True) or {}
@@ -80,14 +70,7 @@ def product_chat():
     if not product or not message:
         return jsonify({"error": "Missing product or message."}), 400
 
-    # ------------------------------------------------------------
-    # IMPORTANT (security note): dito sa example na ito, galing sa
-    # client ang product info (name/price/description/sizes/stock).
-    # Kung may sarili kang product database sa server, mas mabuti
-    # kunin mo ULIT ang tunay na product doon gamit ang product.id
-    # sa halip na basta paniwalaan ang presyo/detalye na pinadala
-    # ng browser — para hindi ito ma-manipulate ng user.
-    # ------------------------------------------------------------
+
 
     sizes = product.get("sizes") if isinstance(product.get("sizes"), list) else []
 
