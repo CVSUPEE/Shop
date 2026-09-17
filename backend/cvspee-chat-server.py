@@ -227,28 +227,7 @@ def _varied_no_reply(message):
     return random.choice(templates)
 
 
-# ============================================================
-# /api/verify-id — AI check for school/work ID + selfie at Sign Up
-# ============================================================
-#
-# IMPORTANT — please read before deploying:
-#
-# This is only a HEURISTIC / "best-effort" check using Gemini vision.
-# It is NOT true government-grade or school-grade identity
-# verification (there's no real liveness detection here — it's a
-# selfie photo, not video, so a determined person could still fool it
-# with a fake ID + a fake/AI-generated "selfie"). Requiring a
-# selfie-holding-ID raises the bar significantly against someone who
-# just grabs a photo of someone else's ID from the internet/social
-# media, but it is NOT a substitute for real KYC (e.g. Sumsub, Onfido,
-# Persona) if you need high-assurance verification.
-#
-# Privacy note: the images (ID + selfie) are sent only to Gemini for
-# a one-time check — this endpoint does NOT save them to disk or a
-# database. If you need an audit trail in the future, you'll need to
-# add your own secure storage — don't just store ID/selfie photos
-# without encryption and a clear retention policy, since this is
-# sensitive personal data (including someone's face).
+
 @app.route("/api/verify-id", methods=["POST"])
 def verify_id():
     data = request.get_json(silent=True) or {}
@@ -339,8 +318,7 @@ def verify_id():
         )
     except Exception as e:
         print("verify-id error:", e)
-        # Fail CLOSED (i.e. don't approve) when the AI check itself
-        # errors out, since this is the gate before an account is created.
+       
         return jsonify({
             "valid": False,
             "reason": "We couldn't verify your ID right now due to a technical error. "
@@ -414,12 +392,7 @@ def _parse_verify_json(raw_text):
     return None
 
 
-# ============================================================
-# /api/support-chat — general "Contact Support" assistant
-# (tungkol lang sa website / produkto / account)
-# ============================================================
 
-# I-update mo ito kapag nagbago ang mga flow sa site.
 SITE_KNOWLEDGE = "\n".join([
     "Tungkol sa CVSPEE:",
     "- Ang CVSPEE ay ang opisyal na campus shop ng Cavite State "
@@ -561,9 +534,6 @@ def support_chat():
     return jsonify({"reply": reply})
 
 
-# ============================================================
-# Shared helper
-# ============================================================
 def _history_to_contents(history):
     """I-convert ang [{role, content}, ...] history papunta sa Gemini Content objects."""
     contents = []
