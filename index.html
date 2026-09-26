@@ -4755,6 +4755,88 @@ body.dark-mode .wishlist-item {
     padding: 30px 0;
 }
 
+.category-filter-wrap {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin: 0 auto 25px;
+}
+
+.filters-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    color: #555;
+    border: 1px solid #ddd;
+    padding: 8px 20px;
+    border-radius: 30px;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.filters-btn:hover {
+    background: #f5f5f5;
+}
+
+.filters-btn.active {
+    background: #1F3A2E;
+    color: #fff;
+    border-color: #1F3A2E;
+}
+
+.filters-btn-icon {
+    flex-shrink: 0;
+}
+
+.category-filter-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 14px;
+    padding: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    flex-wrap: wrap;
+    gap: 8px;
+    z-index: 30;
+    min-width: 240px;
+    max-width: 90vw;
+    justify-content: center;
+}
+
+.category-filter-panel.show {
+    display: flex;
+}
+
+.category-filter-btn {
+    background: #fff;
+    color: #555;
+    border: 1px solid #ddd;
+    padding: 6px 18px;
+    border-radius: 30px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    white-space: nowrap;
+}
+
+.category-filter-btn:hover {
+    background: #f5f5f5;
+}
+
+.category-filter-btn.active {
+    background: #1F3A2E;
+    color: #fff;
+    border-color: #1F3A2E;
+}
+
 .product-section-head {
     display: flex;
     align-items: center;
@@ -6175,6 +6257,7 @@ body.dark-mode .wishlist-item {
 
         <form class="auth-form active" onsubmit="return submitAddProduct(event)" novalidate>
             <input type="text" id="newProductName" placeholder="Product name" required>
+            <input type="text" id="newProductCategory" placeholder="Category (e.g. Bag, Uniform, Footwear)" required>
             <input type="number" id="newProductPrice" placeholder="Price (₱)" min="0" step="0.01" required>
 
             <input type="file" id="newProductImageInput" accept="image/*" onchange="handleNewProductImageSelected(event)">
@@ -6241,6 +6324,7 @@ body.dark-mode .wishlist-item {
 
         <form class="auth-form active" onsubmit="return submitEditProduct(event)" novalidate>
             <input type="text" id="editProductName" placeholder="Product name" required>
+            <input type="text" id="editProductCategory" placeholder="Category (e.g. Bag, Uniform, Footwear)" required>
             <input type="number" id="editProductPrice" placeholder="Price (₱)" min="0" step="0.01" required>
 
             <input type="file" id="editProductImageInput" accept="image/*" onchange="handleEditProductImageSelected(event)">
@@ -6461,6 +6545,19 @@ body.dark-mode .wishlist-item {
     <div class="product-search-wrap">
         <span class="product-search-icon">&#128269;</span>
         <input type="text" id="productSearchInput" class="product-search-input" placeholder="Search products..." oninput="handleProductSearchInput()">
+    </div>
+
+    <div class="category-filter-wrap">
+        <button type="button" class="filters-btn" id="filtersBtn" onclick="toggleCategoryFilterPanel()">
+            <span id="filtersBtnLabel">Filters</span>
+            <svg class="filters-btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="4" y1="7" x2="20" y2="7"></line>
+                <circle cx="9" cy="7" r="2.2" fill="currentColor" stroke="none"></circle>
+                <line x1="4" y1="17" x2="20" y2="17"></line>
+                <circle cx="16" cy="17" r="2.2" fill="currentColor" stroke="none"></circle>
+            </svg>
+        </button>
+        <div class="category-filter-panel" id="categoryFilterBar"></div>
     </div>
 
     <div class="product-section-head">
@@ -8757,6 +8854,7 @@ body.dark-mode .wishlist-item {
         tracksuit: {
             id: "tracksuit",
             name: "CVSU PE Tracksuit",
+            category: "Uniform",
             price: 1119,
             image: "images/product-1.png",
             description: "The official CVSU PE tracksuit — comfortable, breathable, and warm enough for morning classes or outdoor activities. Soft fleece lining, built to last the whole semester.",
@@ -8766,6 +8864,7 @@ body.dark-mode .wishlist-item {
         jersey: {
             id: "jersey",
             name: "CVSU PE Jersey",
+            category: "Uniform",
             price: 699,
             image: "images/TJ.jpg",
             description: "The official CVSU PE jersey — lightweight, breathable fabric that stays comfortable through PE class and everyday campus wear.",
@@ -8775,6 +8874,7 @@ body.dark-mode .wishlist-item {
         shorts: {
             id: "shorts",
             name: "CVSU PE Shorts",
+            category: "Uniform",
             price: 399,
             image: "images/ATS.png",
             description: "Flexible, quick-drying PE shorts with a comfortable stretch fit — part of the official CVSU PE uniform set.",
@@ -8784,6 +8884,7 @@ body.dark-mode .wishlist-item {
         shoes: {
             id: "shoes",
             name: "CVSPEE Campus Shoes",
+            category: "Footwear",
             price: 999,
             image: "images/AJS.jpg",
             description: "Comfortable, durable everyday shoes built for long days on campus — from morning classes to PE period.",
@@ -8793,6 +8894,7 @@ body.dark-mode .wishlist-item {
         idlace: {
             id: "idlace",
             name: "CVSU ID Lace",
+            category: "Accessory",
             price: 79,
             image: "images/id-lace.png",
             description: "Official CVSU ID lace with lanyard clip — durable weave, comfortable to wear all day.",
@@ -8802,6 +8904,7 @@ body.dark-mode .wishlist-item {
         tote: {
             id: "tote",
             name: "CVSPEE Campus Tote Bag",
+            category: "Bag",
             price: 349,
             image: "images/tote-bag.png",
             description: "A spacious, durable tote bag for books, modules, and everyday campus essentials.",
@@ -8856,6 +8959,16 @@ body.dark-mode .wishlist-item {
 
     function isNewProduct(product) {
         return !!(product.createdAt && (Date.now() - product.createdAt) < NEW_PRODUCT_WINDOW_MS);
+    }
+
+    // Normalizes a manually-typed category so "Bag", "bag", "Bags", "BAGS", etc.
+    // all match as the same category. Lowercase + trim + strip one trailing "s".
+    function normalizeCategory(raw) {
+        var c = (raw || "").toString().trim().toLowerCase();
+        if (c.length > 1 && c.charAt(c.length - 1) === "s") {
+            c = c.slice(0, -1);
+        }
+        return c;
     }
 
     function productCardHtml(product) {
@@ -8992,6 +9105,8 @@ body.dark-mode .wishlist-item {
     }
 
     var newProductFilterActive = false;
+    var activeCategoryFilter = null; // null = "All"; otherwise a normalized category string
+    var categoryFilterPanelOpen = false;
 
     function handleNewProductFilterChange() {
         var checkbox = document.getElementById("newProductFilterCheckbox");
@@ -9000,9 +9115,63 @@ body.dark-mode .wishlist-item {
         renderProductGrid();
     }
 
+    function toggleCategoryFilterPanel(forceState) {
+        categoryFilterPanelOpen = (typeof forceState === "boolean") ? forceState : !categoryFilterPanelOpen;
+        var panel = document.getElementById("categoryFilterBar");
+        if (panel) panel.classList.toggle("show", categoryFilterPanelOpen);
+    }
+
+    function setCategoryFilter(normalizedCategory) {
+        activeCategoryFilter = normalizedCategory;
+        currentProductPage = 1;
+        toggleCategoryFilterPanel(false);
+        renderProductGrid();
+    }
+
+    document.addEventListener("click", function (event) {
+        if (!categoryFilterPanelOpen) return;
+        var wrap = event.target.closest ? event.target.closest(".category-filter-wrap") : null;
+        if (!wrap) toggleCategoryFilterPanel(false);
+    });
+
+    function renderCategoryFilterBar() {
+        var bar = document.getElementById("categoryFilterBar");
+        var labelEl = document.getElementById("filtersBtnLabel");
+        var btnEl = document.getElementById("filtersBtn");
+        if (!bar) return;
+
+        var seen = {};
+        Object.keys(PRODUCTS).forEach(function (id) {
+            var raw = (PRODUCTS[id].category || "").toString().trim();
+            if (!raw) return;
+            var norm = normalizeCategory(raw);
+            if (!seen[norm]) seen[norm] = raw.charAt(0).toUpperCase() + raw.slice(1);
+        });
+
+        var norms = Object.keys(seen).sort();
+
+        var html = '<button type="button" class="category-filter-btn' +
+            (activeCategoryFilter === null ? ' active' : '') +
+            '" onclick="setCategoryFilter(null)">All</button>';
+
+        html += norms.map(function (norm) {
+            return '<button type="button" class="category-filter-btn' +
+                (activeCategoryFilter === norm ? ' active' : '') +
+                '" onclick="setCategoryFilter(\'' + norm + '\')">' + escapeHtml(seen[norm]) + '</button>';
+        }).join("");
+
+        bar.innerHTML = html;
+        bar.classList.toggle("show", categoryFilterPanelOpen);
+
+        if (labelEl) labelEl.textContent = activeCategoryFilter ? ("Filters: " + seen[activeCategoryFilter]) : "Filters";
+        if (btnEl) btnEl.classList.toggle("active", !!activeCategoryFilter);
+    }
+
     function renderProductGrid() {
         var grid = document.getElementById("productGrid");
         if (!grid) return;
+
+        renderCategoryFilterBar();
 
         var searchInput = document.getElementById("productSearchInput");
         var query = searchInput ? searchInput.value.trim().toLowerCase() : "";
@@ -9010,13 +9179,16 @@ body.dark-mode .wishlist-item {
         var ids = Object.keys(PRODUCTS).filter(function (id) {
             var matchesQuery = !query || PRODUCTS[id].name.toLowerCase().indexOf(query) !== -1;
             var matchesNewFilter = !newProductFilterActive || isNewProduct(PRODUCTS[id]);
-            return matchesQuery && matchesNewFilter;
+            var matchesCategory = !activeCategoryFilter || normalizeCategory(PRODUCTS[id].category) === activeCategoryFilter;
+            return matchesQuery && matchesNewFilter && matchesCategory;
         });
 
         if (ids.length === 0) {
             var emptyMsg = newProductFilterActive
                 ? "No new products right now."
-                : 'No products found for "' + escapeHtml(searchInput ? searchInput.value.trim() : "") + '".';
+                : (activeCategoryFilter
+                    ? "No products found in this category."
+                    : 'No products found for "' + escapeHtml(searchInput ? searchInput.value.trim() : "") + '".');
             grid.innerHTML = '<p class="product-search-empty">' + emptyMsg + '</p>';
             var paginationEl = document.getElementById("productPagination");
             if (paginationEl) paginationEl.innerHTML = "";
@@ -9433,6 +9605,7 @@ body.dark-mode .wishlist-item {
         var errorEl = document.getElementById("addProductError");
 
         var name = document.getElementById("newProductName").value.trim();
+        var category = document.getElementById("newProductCategory").value.trim();
         var priceRaw = document.getElementById("newProductPrice").value;
         var price = parseFloat(priceRaw);
         var description = document.getElementById("newProductDescription").value.trim();
@@ -9444,6 +9617,10 @@ body.dark-mode .wishlist-item {
 
         if (!name) {
             errorEl.textContent = "Please enter a product name.";
+            return false;
+        }
+        if (!category) {
+            errorEl.textContent = "Please enter a category.";
             return false;
         }
         if (!priceRaw || isNaN(price) || price < 0) {
@@ -9471,6 +9648,7 @@ body.dark-mode .wishlist-item {
         var product = {
             id: id,
             name: name,
+            category: category,
             price: price,
             image: newProductImageDataUrl,
             description: description,
@@ -9530,6 +9708,7 @@ body.dark-mode .wishlist-item {
         editProductImageDataUrl = null;
 
         document.getElementById("editProductName").value = product.name;
+        document.getElementById("editProductCategory").value = product.category || "";
         document.getElementById("editProductPrice").value = product.price;
         document.getElementById("editProductDescription").value = product.description;
         document.getElementById("editProductSizes").value = (product.sizes || []).join(", ");
@@ -9599,6 +9778,7 @@ body.dark-mode .wishlist-item {
         var errorEl = document.getElementById("editProductError");
 
         var name = document.getElementById("editProductName").value.trim();
+        var category = document.getElementById("editProductCategory").value.trim();
         var priceRaw = document.getElementById("editProductPrice").value;
         var price = parseFloat(priceRaw);
         var description = document.getElementById("editProductDescription").value.trim();
@@ -9610,6 +9790,10 @@ body.dark-mode .wishlist-item {
 
         if (!name) {
             errorEl.textContent = "Please enter a product name.";
+            return false;
+        }
+        if (!category) {
+            errorEl.textContent = "Please enter a category.";
             return false;
         }
         if (!priceRaw || isNaN(price) || price < 0) {
@@ -9654,6 +9838,7 @@ body.dark-mode .wishlist-item {
         var updatedProduct = {
             id: productId,
             name: name,
+            category: category,
             price: price,
             image: editProductImageDataUrl || existing.image,
             description: description,
